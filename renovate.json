@@ -99,7 +99,7 @@
       "groupName": "Keycloak dependency"
     },
     {
-      "matchFileNames": ["plugins/orchestrator*/**","notifications*/**"],      
+      "matchFileNames": ["plugins/orchestrator*/**","plugins/notifications*/**"],      
       "additionalBranchPrefix": "orchestrator -",
       "matchPackagePatterns": [".*"]
     },      
