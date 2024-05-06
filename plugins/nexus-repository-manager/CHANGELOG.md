@@ -1,0 +1,147 @@
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.4.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.4.3...@janus-idp/backstage-plugin-nexus-repository-manager@1.4.4) (2023-11-07)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.0
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.4.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.4.2...@janus-idp/backstage-plugin-nexus-repository-manager@1.4.3) (2023-11-06)
+
+
+### Bug Fixes
+
+* **cli:** add default scalprum config ([#909](https://github.com/janus-idp/backstage-plugins/issues/909)) ([d74fc72](https://github.com/janus-idp/backstage-plugins/commit/d74fc72ab7e0a843da047c7b6570d8a6fbc068e1))
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.3.3
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.4.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.4.1...@janus-idp/backstage-plugin-nexus-repository-manager@1.4.2) (2023-11-06)
+
+
+### Documentation
+
+* update frontend plugin docs to use EntityLayout instead of EntityPageLayout ([#907](https://github.com/janus-idp/backstage-plugins/issues/907)) ([aa91bba](https://github.com/janus-idp/backstage-plugins/commit/aa91bba4c7a43de416258eb019724e21c7cf4bb8))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.4.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.4.0...@janus-idp/backstage-plugin-nexus-repository-manager@1.4.1) (2023-11-02)
+
+
+### Bug Fixes
+
+* **scalprum:** share react-router since various 3rd party plugins use it ([#902](https://github.com/janus-idp/backstage-plugins/issues/902)) ([1a548f2](https://github.com/janus-idp/backstage-plugins/commit/1a548f2b11df92fb44651d8418f6529e22833996))
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.3.2
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.4.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.3.2...@janus-idp/backstage-plugin-nexus-repository-manager@1.4.0) (2023-11-01)
+
+
+### Features
+
+* **dynamic-plugins:** publish dynamic assets for all frontend plugins ([#896](https://github.com/janus-idp/backstage-plugins/issues/896)) ([dcfb0ac](https://github.com/janus-idp/backstage-plugins/commit/dcfb0ac56769c82f6b8b2cef2726251e0b60c375))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.3.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.3.1...@janus-idp/backstage-plugin-nexus-repository-manager@1.3.2) (2023-10-23)
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.0.0
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.3.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.3.0...@janus-idp/backstage-plugin-nexus-repository-manager@1.3.1) (2023-10-19)
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 1.3.3
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.3.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.2.1...@janus-idp/backstage-plugin-nexus-repository-manager@1.3.0) (2023-10-17)
+
+
+### Features
+
+* **nexus:** initial maven support ([#828](https://github.com/janus-idp/backstage-plugins/issues/828)) ([d54060b](https://github.com/janus-idp/backstage-plugins/commit/d54060be0e62f5945b5062bea7ed85b8a418731d)), closes [/stackoverflow.com/questions/13630849/git-difference-between-assume-unchanged-and-skip-worktree/13631525#13631525](https://github.com/janus-idp//stackoverflow.com/questions/13630849/git-difference-between-assume-unchanged-and-skip-worktree/13631525/issues/13631525)
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.2.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.2.0...@janus-idp/backstage-plugin-nexus-repository-manager@1.2.1) (2023-10-16)
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 1.3.2
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.2.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.1.2...@janus-idp/backstage-plugin-nexus-repository-manager@1.2.0) (2023-10-13)
+
+
+### Features
+
+* **nexus:** sort artifacts by most recent first by default ([#829](https://github.com/janus-idp/backstage-plugins/issues/829)) ([01c28c2](https://github.com/janus-idp/backstage-plugins/commit/01c28c2907d6ae331536f1938e805b3f9b22b8a1))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.1.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.1.1...@janus-idp/backstage-plugin-nexus-repository-manager@1.1.2) (2023-09-26)
+
+
+### Bug Fixes
+
+* **Nexus:** jsdoc comment fixed ([#802](https://github.com/janus-idp/backstage-plugins/issues/802)) ([e07ef99](https://github.com/janus-idp/backstage-plugins/commit/e07ef99dcbf09cd05c52f35d7f9e86fe289a9823))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.1.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.1.0...@janus-idp/backstage-plugin-nexus-repository-manager@1.1.1) (2023-09-22)
+
+
+### Bug Fixes
+
+* **nexus:** set accept headers to prefer docker schema 2 v2 when available ([#719](https://github.com/janus-idp/backstage-plugins/issues/719)) ([29d9c89](https://github.com/janus-idp/backstage-plugins/commit/29d9c89c91b6f53b2f439de4b0e0c2e4defe34ee))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 1.3.1
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.1.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.0.4...@janus-idp/backstage-plugin-nexus-repository-manager@1.1.0) (2023-09-08)
+
+
+### Features
+
+* **nexus:** support docker manifest 2 schema 1 ([#713](https://github.com/janus-idp/backstage-plugins/issues/713)) ([e7168cb](https://github.com/janus-idp/backstage-plugins/commit/e7168cb5635f29bb704489e350954949f624cbf2))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.0.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.0.3...@janus-idp/backstage-plugin-nexus-repository-manager@1.0.4) (2023-09-07)
+
+
+### Documentation
+
+* **nexus:** update nexus CONTRIBUTING.md and turbo to ensure generate command is ran ([#718](https://github.com/janus-idp/backstage-plugins/issues/718)) ([19f2f01](https://github.com/janus-idp/backstage-plugins/commit/19f2f018deafa3a521ce8826a26736b15275a9a1))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.0.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.0.2...@janus-idp/backstage-plugin-nexus-repository-manager@1.0.3) (2023-09-06)
+
+
+### Documentation
+
+* **nexus:** nexus plugin documentation ([#714](https://github.com/janus-idp/backstage-plugins/issues/714)) ([643196e](https://github.com/janus-idp/backstage-plugins/commit/643196e560dd34a5eb5d26c13024ed099ba6ea7f))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.0.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.0.1...@janus-idp/backstage-plugin-nexus-repository-manager@1.0.2) (2023-08-31)
+
+## @janus-idp/backstage-plugin-nexus-repository-manager [1.0.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-nexus-repository-manager@1.0.0...@janus-idp/backstage-plugin-nexus-repository-manager@1.0.1) (2023-08-24)
+
+
+### Documentation
+
+* **nexus:** update README.md ([#669](https://github.com/janus-idp/backstage-plugins/issues/669)) ([5f48f12](https://github.com/janus-idp/backstage-plugins/commit/5f48f122d2a1f088c60ba456f0aa5f820d8d2b82))
+
+## @janus-idp/backstage-plugin-nexus-repository-manager 1.0.0 (2023-08-22)
+
+
+### Features
+
+* **nexus:** add nexus repository manager plugin ([#618](https://github.com/janus-idp/backstage-plugins/issues/618)) ([157a58d](https://github.com/janus-idp/backstage-plugins/commit/157a58d5149b7383083363bd13ba384cfc554c99))
+
+
+### Bug Fixes
+
+* **ci:** add generated files to .prettierignore ([#661](https://github.com/janus-idp/backstage-plugins/issues/661)) ([a273f5d](https://github.com/janus-idp/backstage-plugins/commit/a273f5d61e8625f238eaa90f134851ba8b63b014))

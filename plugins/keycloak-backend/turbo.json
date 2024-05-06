@@ -1,0 +1,17 @@
+{
+  "extends": ["//"],
+  "pipeline": {
+    "start:plugin": {
+      "cache": false,
+      "persistent": true
+    },
+    "start:keycloak": {
+      "cache": false,
+      "persistent": true
+    },
+    "tsc": {
+      "outputs": ["../../dist-types/plugins/keycloak-backend/**"],
+      "dependsOn": ["^tsc"]
+    }
+  }
+}
