@@ -119,7 +119,7 @@
       "matchPackagePatterns": [".*"]
     },             
     {
-      "matchFileNames": ["plugins/keycloak*/**", "plugins/ocm*/**", "plugins/rbac*/**", "plugins/regex-actions*/**", "plugins/topology*/**", "plugins/analytics-provider-segment*/**", "plugins/dynamic-frontend-plugin*/**"],      
+      "matchFileNames": ["plugins/keycloak*/**", "plugins/ocm*/**", "plugins/rbac*/**", "plugins/regex-actions*/**", "plugins/topology*/**", "plugins/analytics-provider-segment*/**", "plugins/dynamic-frontend-plugin*/**", "packages/**"],      
       "additionalBranchPrefix": "rhdh -",
       "matchPackagePatterns": [".*"]
     },
@@ -132,6 +132,7 @@
   "ignorePaths": ["**/dist-dynamic/**"],
   "vulnerabilityAlerts": {
     "enabled": true,
+    "groupName": "Update dependency {{packageName}} to {{bumpVersion}}",
     "addLabels": ["kind/security"]
   },
   "osvVulnerabilityAlerts": true
