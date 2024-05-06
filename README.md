@@ -1,0 +1,1 @@
+# renovate-backstage-plugins-1.0
