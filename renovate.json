@@ -110,7 +110,7 @@
     },     
     {
       "matchFileNames": ["plugins/*matomo*/**"],      
-      "additionalBranchPrefix": "matomo -",
+      "additionalBranchPrefix": "devex -",
       "matchPackagePatterns": [".*"]
     },  
     {
@@ -132,7 +132,7 @@
   "ignorePaths": ["**/dist-dynamic/**"],
   "vulnerabilityAlerts": {
     "enabled": true,
-    "groupName": "Update dependency {{packageName}} to {{bumpVersion}}",
+    "groupName": "{{additionalBranchPrefix}} Update dependency {{packageName}} to {{bumpVersion}}",
     "addLabels": ["kind/security"]
   },
   "osvVulnerabilityAlerts": true
