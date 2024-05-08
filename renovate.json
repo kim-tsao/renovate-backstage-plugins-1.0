@@ -122,13 +122,13 @@
       "matchFileNames": ["plugins/keycloak*/**", "plugins/ocm*/**", "plugins/rbac*/**", "plugins/regex-actions*/**", "plugins/topology*/**", "plugins/analytics-provider-segment*/**", "plugins/dynamic-frontend-plugin*/**", "packages/**"],      
       "additionalBranchPrefix": "rhdh -",
       "matchPackagePatterns": [".*"],
-      "assignees": ["janus-idp/maintainers-plugins"]
+      "assignees": ["team:janus-idp/maintainers-plugins"]
     },
     {
       "matchFileNames": ["plugins/3scale-backend*/**", "plugins/aap-backend*/**", "plugins/acr*/**", "plugins/jfrog-artifactory*/**", "plugins/kubernetes-actions*/**", "plugins/nexus-repository-manager*/**", "plugins/openshift-image-registry*/**",  "plugins/servicenow-actions*/**",  "plugins/shared-react*/**",  "plugins/sonarqube-actions*/**"],      
       "additionalBranchPrefix": "community -",
       "matchPackagePatterns": [".*"],
-      "assignees": ["janus-idp/maintainers-plugins"]
+      "assignees": ["team:janus-idp/maintainers-plugins"]
     }           
   ],
   "ignorePaths": ["**/dist-dynamic/**"],
