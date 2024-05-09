@@ -12,6 +12,6 @@
 # This should make it easy to add new rules without breaking existing ones.
 
 # Global rule:
-*                            @janus-idp/maintainers-renovate-test
-yarn.lock                    @janus-idp/maintainers-renovate-test
-*/yarn.lock                  @janus-idp/maintainers-renovate-test
+*                            @kim-tsao
+yarn.lock                    @kim-tsao
+*/yarn.lock                  @kim-tsao
