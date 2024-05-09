@@ -1,0 +1,149 @@
+{
+  "extends": [
+    "config:best-practices",
+    ":gitSignOff",
+    ":rebaseStalePrs",
+    "group:linters",
+    ":preserveSemverRanges",
+    ":pinOnlyDevDependencies",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "ignorePresets": ["group:monorepos"], 
+  "labels": ["kind/dependency upgrade"],
+  "npm": {
+    "minimumReleaseAge": "1 day"
+  },
+  "major": {
+    "dependencyDashboardApproval": true
+  },
+  "packageRules": [
+    {
+      "description": "Do automerge and pin actions in GH workflows, except for versions starting with 0",
+      "enabled": true,
+      "matchManagers": ["github-actions"],
+      "matchCurrentVersion": "!/^0/",
+      "groupName": "GitHub Actions",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "matchDepTypes": ["dependencies"],
+      "groupName": "{{additionalBranchPrefix}} Dependencies (minor)",
+      "matchPackagePatterns": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
+    },    
+    {
+      "matchDepTypes": ["dependencies"],
+      "groupName": "{{additionalBranchPrefix}} Dependencies",
+      "matchPackagePatterns": [
+        "*"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ]
+    },       
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "{{additionalBranchPrefix}} DevDependencies (minor)",
+      "automerge": true
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "{{additionalBranchPrefix}} DevDependencies"
+    },    
+    {
+      "extends": "packages:test",
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "{{additionalBranchPrefix}}  Test packages (minor)",
+      "automerge": true
+    },
+    {
+      "extends": "packages:test",
+      "matchUpdateTypes": ["major"],
+      "groupName": "{{additionalBranchPrefix}} Test packages"
+    },    
+    {
+      "matchDepPatterns": ["^@backstage/"],
+      "groupName": "Core Backstage packages",
+      "enabled": "false"
+    },
+    {
+      "matchDepPatterns": [
+        "^@semantic-release/",
+        "^@semrel-extra/",
+        "^multi-semantic-release$"
+      ],
+      "groupName": "semantic-release monorepo"
+    },
+    {
+      "description": "disable updates to the keycloak admin client - see https://github.com/janus-idp/backstage-plugins/issues/47 https://github.com/janus-idp/backstage-plugins/issues/1046",
+      "enabled": false,
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@keycloak/keycloak-admin-client"],
+      "groupName": "Keycloak dependency"
+    },
+    {
+      "description": "ignore updates to the axios to version that keycloak 18 needs",
+      "enabled": false,
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["axios"],
+      "matchCurrentVersion": "0.26.1",
+      "groupName": "Keycloak dependency"
+    },
+    {
+      "matchFileNames": ["plugins/orchestrator*/**"],      
+      "additionalBranchPrefix": "orchestrator -",
+      "addLabels": ["team:orchestrator"],
+      "matchPackagePatterns": [".*"]
+    },    
+    {
+      "matchFileNames": ["plugins/notifications*/**"],      
+      "additionalBranchPrefix": "notifications -",
+      "addLabels": ["team:notifications"],
+      "matchPackagePatterns": [".*"]
+    },            
+    {
+      "matchFileNames": ["plugins/kiali*/**"],      
+      "additionalBranchPrefix": "kiali -",
+      "addLabels": ["team:kiali"],
+      "matchPackagePatterns": [".*"]
+    },     
+    {
+      "matchFileNames": ["plugins/*matomo*/**"],      
+      "additionalBranchPrefix": "devex -",
+      "addLabels": ["team:devex"],
+      "matchPackagePatterns": [".*"]
+    },  
+    {
+      "matchFileNames": ["plugins/quay*/**", "plugins/tekton*/**"],      
+      "additionalBranchPrefix": "rhtap -",
+      "addLabels": ["team:rhtap"],
+      "matchPackagePatterns": [".*"]
+    },             
+    {
+      "matchFileNames": ["plugins/keycloak*/**", "plugins/ocm*/**", "plugins/rbac*/**", "plugins/regex-actions*/**", "plugins/topology*/**", "plugins/analytics-provider-segment*/**", "plugins/dynamic-frontend-plugin*/**", "packages/**"],      
+      "additionalBranchPrefix": "rhdh -",
+      "matchPackagePatterns": [".*"],
+      "addLabels": ["team:rhdh"]
+    },
+    {
+      "matchFileNames": ["plugins/3scale-backend*/**", "plugins/aap-backend*/**", "plugins/acr*/**", "plugins/jfrog-artifactory*/**", "plugins/kubernetes-actions*/**", "plugins/nexus-repository-manager*/**", "plugins/openshift-image-registry*/**",  "plugins/servicenow-actions*/**",  "plugins/shared-react*/**",  "plugins/sonarqube-actions*/**"],      
+      "additionalBranchPrefix": "community -",
+      "matchPackagePatterns": [".*"],
+      "addLabels": ["team:community"]
+    }           
+  ],
+  "ignorePaths": ["**/dist-dynamic/**"],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": ["kind/security"]
+  },
+  "osvVulnerabilityAlerts": true
+}
