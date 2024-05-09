@@ -100,51 +100,48 @@
     {
       "matchFileNames": ["plugins/orchestrator*/**"],      
       "additionalBranchPrefix": "orchestrator -",
-      "addLabels": ["orchestrator"],
+      "addLabels": ["team:orchestrator"],
       "matchPackagePatterns": [".*"]
     },    
     {
       "matchFileNames": ["plugins/notifications*/**"],      
       "additionalBranchPrefix": "notifications -",
-      "addLabels": ["notifications"],
+      "addLabels": ["team:notifications"],
       "matchPackagePatterns": [".*"]
     },            
     {
       "matchFileNames": ["plugins/kiali*/**"],      
       "additionalBranchPrefix": "kiali -",
-      "addLabels": ["kiali"],
+      "addLabels": ["team:kiali"],
       "matchPackagePatterns": [".*"]
     },     
     {
       "matchFileNames": ["plugins/*matomo*/**"],      
       "additionalBranchPrefix": "devex -",
-      "addLabels": ["devex"],
+      "addLabels": ["team:devex"],
       "matchPackagePatterns": [".*"]
     },  
     {
       "matchFileNames": ["plugins/quay*/**", "plugins/tekton*/**"],      
       "additionalBranchPrefix": "rhtap -",
-      "addLabels": ["rhtap"],
+      "addLabels": ["team:rhtap"],
       "matchPackagePatterns": [".*"]
     },             
     {
       "matchFileNames": ["plugins/keycloak*/**", "plugins/ocm*/**", "plugins/rbac*/**", "plugins/regex-actions*/**", "plugins/topology*/**", "plugins/analytics-provider-segment*/**", "plugins/dynamic-frontend-plugin*/**", "packages/**"],      
       "additionalBranchPrefix": "rhdh -",
       "matchPackagePatterns": [".*"],
-      "addLabels": ["rhdh"],
-      "reviewers": ["team:maintainers-plugins"]
+      "addLabels": ["team:rhdh"]
     },
     {
       "matchFileNames": ["plugins/3scale-backend*/**", "plugins/aap-backend*/**", "plugins/acr*/**", "plugins/jfrog-artifactory*/**", "plugins/kubernetes-actions*/**", "plugins/nexus-repository-manager*/**", "plugins/openshift-image-registry*/**",  "plugins/servicenow-actions*/**",  "plugins/shared-react*/**",  "plugins/sonarqube-actions*/**"],      
       "additionalBranchPrefix": "community -",
       "matchPackagePatterns": [".*"],
-      "addLabels": ["community"],
-      "reviewers": ["team:maintainers-plugins"]
+      "addLabels": ["team:community"]
     }           
   ],
   "ignorePaths": ["**/dist-dynamic/**"],
   "vulnerabilityAlerts": {
-    "baseBranches": ["main", "/^1\\..*\\.x/"],
     "enabled": true,
     "addLabels": ["kind/security"]
   },
