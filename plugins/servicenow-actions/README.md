@@ -18,7 +18,7 @@ Run the following command to install the action package in your Backstage projec
 yarn workspace backend add @janus-idp/backstage-scaffolder-backend-module-servicenow
 ```
 
-## Configuration
+### Installing the action on the legacy backend
 
 [Register](https://backstage.io/docs/features/software-templates/writing-custom-actions#registering-custom-actions) the ServiceNow actions by modifying the `packages/backend/src/plugins/scaffolder.ts` file from your project with the following changes:
 
@@ -47,6 +47,35 @@ export default async function createPlugin(
     identity: env.identity,
   });
 }
+```
+
+### Installing the action on the new backend
+
+Add the following to your `packages/backend/src/index.ts` file:
+
+```ts title="packages/backend/src/index.ts"
+const backend = createBackend();
+
+// Add the following line
+backend.add(
+  import('@janus-idp/backstage-scaffolder-backend-module-servicenow/alpha'),
+);
+
+backend.start();
+```
+
+## Configuration
+
+Update the `app-config.yaml` file to include the following config:
+
+```yaml title="app-config.yaml"
+servicenow:
+  # The base url of the ServiceNow instance.
+  baseUrl: ${SERVICENOW_BASE_URL}
+  # The username to use for authentication.
+  username: ${SERVICENOW_USERNAME}
+  # The password to use for authentication.
+  password: ${SERVICENOW_PASSWORD}
 ```
 
 ## Usage
@@ -142,7 +171,7 @@ export default async function createPlugin(
 | Parameter Name                    |              Type              | Required | Description                                                                               |
 | --------------------------------- | :----------------------------: | :------: | ----------------------------------------------------------------------------------------- |
 | `tableName`                       |            `string`            |   Yes    | Name of the table from which to retrieve the records                                      |
-| `sysparamQuery`                   |            `string`            |    No    | An encoded query string used to filter the results                                        |
+| `sysparmQuery`                    |            `string`            |    No    | An encoded query string used to filter the results                                        |
 | `sysparmDisplayValue`             | `enum("true", "false", "all")` |    No    | Return field display values (true), actual values (false), or both (all) (default: false) |
 | `sysparmExcludeReferenceLink`     |           `boolean`            |    No    | True to exclude Table API links for reference fields (default: false)                     |
 | `sysparmSuppressPaginationHeader` |           `boolean`            |    No    | True to suppress pagination header (default: false)                                       |

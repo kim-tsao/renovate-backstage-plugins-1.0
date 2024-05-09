@@ -1,3 +1,67 @@
+## @janus-idp/shared-react [2.6.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.5.5...@janus-idp/shared-react@2.6.0) (2024-04-15)
+
+
+### Features
+
+* checkPluginVersion.sh bump plugins for 1.2.0 release ([#1511](https://github.com/janus-idp/backstage-plugins/issues/1511)) ([73c6588](https://github.com/janus-idp/backstage-plugins/commit/73c6588adb7e8c20907b06f2a8ef248cfd4332e4))
+
+## @janus-idp/shared-react [2.5.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.5.4...@janus-idp/shared-react@2.5.5) (2024-04-09)
+
+## @janus-idp/shared-react [2.5.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.5.3...@janus-idp/shared-react@2.5.4) (2024-04-08)
+
+## @janus-idp/shared-react [2.5.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.5.2...@janus-idp/shared-react@2.5.3) (2024-03-29)
+
+## @janus-idp/shared-react [2.5.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.5.1...@janus-idp/shared-react@2.5.2) (2024-02-21)
+
+## @janus-idp/shared-react [2.5.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.5.0...@janus-idp/shared-react@2.5.1) (2024-02-02)
+
+
+### Bug Fixes
+
+* **tekton:** fix [#947](https://github.com/janus-idp/backstage-plugins/issues/947): Reset pagination when changing any filter ([#1140](https://github.com/janus-idp/backstage-plugins/issues/1140)) ([5a1a2f4](https://github.com/janus-idp/backstage-plugins/commit/5a1a2f442e2c5957bd725e57066448e5b67d8807))
+
+## @janus-idp/shared-react [2.5.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.4.0...@janus-idp/shared-react@2.5.0) (2024-01-30)
+
+
+### Features
+
+* **tekton:** add view output action in pipelinerun list view ([#1128](https://github.com/janus-idp/backstage-plugins/issues/1128)) ([ad50c44](https://github.com/janus-idp/backstage-plugins/commit/ad50c44233332b0f1325cef5a41d82ba79c538fb))
+
+## @janus-idp/shared-react [2.4.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.3.0...@janus-idp/shared-react@2.4.0) (2024-01-17)
+
+
+### Features
+
+* **rbac:** allow editing permission policies ([#1037](https://github.com/janus-idp/backstage-plugins/issues/1037)) ([c10347d](https://github.com/janus-idp/backstage-plugins/commit/c10347d1ecaa13d6d786ab51a05c6046530e457c))
+
+## @janus-idp/shared-react [2.3.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.2.0...@janus-idp/shared-react@2.3.0) (2023-12-22)
+
+
+### Features
+
+* **tekton:** add CVE summary and signed badge ([#1028](https://github.com/janus-idp/backstage-plugins/issues/1028)) ([effdef0](https://github.com/janus-idp/backstage-plugins/commit/effdef085deaeea78a819d1bde960f83820ec705))
+
+## @janus-idp/shared-react [2.2.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.1.0...@janus-idp/shared-react@2.2.0) (2023-12-20)
+
+
+### Features
+
+* **tekton:** add view logs and view sbom actions in the pipelineRun list ([#1003](https://github.com/janus-idp/backstage-plugins/issues/1003)) ([c7eff5f](https://github.com/janus-idp/backstage-plugins/commit/c7eff5f33daef8eaba58df7e987b44f09c7a8ff9))
+
+## @janus-idp/shared-react [2.1.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.0.1...@janus-idp/shared-react@2.1.0) (2023-12-14)
+
+
+### Features
+
+* **tekton:** add support for downloading task and pipelinerun logs ([#1014](https://github.com/janus-idp/backstage-plugins/issues/1014)) ([f588292](https://github.com/janus-idp/backstage-plugins/commit/f5882921756a7aa6d5a74d8fdb6bfc52a7c0c209))
+
+## @janus-idp/shared-react [2.0.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.0.0...@janus-idp/shared-react@2.0.1) (2023-11-23)
+
+
+### Bug Fixes
+
+* **tekton:** update tekton version in the documentation ([#958](https://github.com/janus-idp/backstage-plugins/issues/958)) ([51cc924](https://github.com/janus-idp/backstage-plugins/commit/51cc924b1341d04aa75a1713713c8a6700b2c0a3))
+
 ## @janus-idp/shared-react [2.0.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@1.3.3...@janus-idp/shared-react@2.0.0) (2023-10-23)
 
 

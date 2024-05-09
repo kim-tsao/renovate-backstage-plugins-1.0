@@ -2,11 +2,13 @@
 
 ## Minimal Setup
 
-1. Go to plugins/kiali
+1. Run `yarn install` from the project root (For the first time setup)
 
-2. Execute yarn start
+2. Go to `plugins/kiali`
 
-3. Go to `http://localhost:3000/kiali`
+3. Execute `yarn start`
+
+4. Go to `http://localhost:3000/kiali`
 
 ## Full Setup
 
@@ -18,51 +20,13 @@
    "@janus-idp/backstage-plugin-kiali": "link:../../plugins/kiali",
    ```
 
-   or launch
-
-   ```bash
-   yarn workspace add @janus-idp/backstage-plugin-kiali@*
-   ```
-
    - Add to packages/backend/package.json
 
    ```yaml title="packages/backend/package.json"
-   '@janus-idp/backstage-plugin-kiali-backend': 'link:../../plugins/kiali-backend'
+   "@janus-idp/backstage-plugin-kiali-backend": "link:../../plugins/kiali-backend",
    ```
 
-   or launch
-
-   ```bash
-   yarn workspace backend @janus-idp/backstage-plugin-kiali-backend@*
-   ```
-
-2. If you are going to modify `kiali-common` then you need to link this too.
-
-   - Replace in plugin/kiali/package.json
-
-   ```yaml title="plugin/kiali/package.json"
-   "@janus-idp/backstage-plugin-kiali-common": "link:../kiali-common",
-   ```
-
-   or launch
-
-   ```bash
-   yarn upgrade @janus-idp/backstage-plugin-kiali-common@link:../kiali-common
-   ```
-
-   - Replace in plugin/kiali-backend/package.json
-
-   ```yaml title="plugin/kiali-backend/package.json"
-   "@janus-idp/backstage-plugin-kiali-common": "link:../kiali-common",
-   ```
-
-   or launch
-
-   ```bash
-   yarn upgrade @janus-idp/backstage-plugin-kiali-common@link:../kiali-common
-   ```
-
-3. Enable the **Kiali** tab on the entity view page using the `packages/app/src/components/catalog/EntityPage.tsx` file:
+2. Enable the **Kiali** tab on the entity view page using the `packages/app/src/components/catalog/EntityPage.tsx` file:
 
    ```tsx title="packages/app/src/components/catalog/EntityPage.tsx"
    /* highlight-add-next-line */
@@ -80,95 +44,145 @@
    );
    ```
 
-4. Create a file called `kiali.ts` inside `packages/backend/src/plugins/` and add the following:
+3. Create a file called `kiali.ts` inside `packages/backend/src/plugins/` and add the following:
 
-```ts
-/* highlight-add-start */
-import { CatalogClient } from '@backstage/catalog-client';
+   ```ts title="packages/backend/src/plugins/kiali.tsx"
+   /* highlight-add-start */
+   import { Router } from 'express';
 
-import { Router } from 'express';
+   // ..
+   import { createRouter } from '@janus-idp/backstage-plugin-kiali-backend';
 
-import { createRouter } from '@janus-idp/backstage-plugin-kiali-backend';
+   import { PluginEnvironment } from '../types';
 
-import { PluginEnvironment } from '../types';
+   export default async function createPlugin(
+     env: PluginEnvironment,
+   ): Promise<Router> {
+     return await createRouter({
+       logger: env.logger,
+       config: env.config,
+     });
+   }
+   // ..
+   /* highlight-add-end */
+   ```
 
-export default async function createPlugin(
-  env: PluginEnvironment,
-): Promise<Router> {
-  const catalogApi = new CatalogClient({ discoveryApi: env.discovery });
-  return await createRouter({
-    logger: env.logger,
-    catalogApi,
-    config: env.config,
-  });
-}
-/* highlight-add-end */
-```
+4. import the plugin to `packages/backend/src/index.ts`. There are three lines of code you'll need to add, and they should be added near similar code in your existing Backstage backend.
 
-5. import the plugin to `packages/backend/src/index.ts`. There are three lines of code you'll need to add, and they should be added near similar code in your existing Backstage backend.
+   ```typescript title="packages/backend/src/index.ts"
+   // ..
+   /* highlight-add-next-line */
+   import kiali from './plugins/kiali';
 
-```typescript title="packages/backend/src/index.ts"
-// ..
-/* highlight-add-next-line */
-import kiali from './plugins/kiali';
+   async function main() {
+     // ...
+     /* highlight-add-next-line */
+     const kialiEnv = useHotMemoize(module, () => createEnv('kiali'));
+     // ...
+     /* highlight-add-next-line */
+     apiRouter.use('/kiali', await kiali(kialiEnv));
+     // ...
+   }
+   ```
 
-async function main() {
-  // ...
-  /* highlight-add-next-line */
-  const kialiEnv = useHotMemoize(module, () => createEnv('kiali'));
-  // ...
-  /* highlight-add-next-line */
-  apiRouter.use('/kiali', await kiali(kialiEnv));
-```
+5. Configure you `app-config.local.yaml` with kiali configuration
 
-6. Configure you `app-config.yaml` with kiali configuration
+   ```yaml
+   catalog:
+     providers:
+       # highlight-add-start
+       kiali:
+         # Required. Kiali endpoint
+         url: ${KIALI_ENDPOINT}
+         # Optional. Required by token authentication
+         serviceAccountToken: ${KIALI_SERVICE_ACCOUNT_TOKEN}
+         # Optional. defaults false
+         skipTLSVerify: true
+         # Optional
+         caData: ${KIALI_CONFIG_CA_DATA}
+         # Optional. Local path to CA file
+         caFile: ''
+         # Optional. Time in seconds that session is enabled, defaults to 1 minute.
+         sessionTime: 60
+         # highlight-add-end
+   ```
 
-```yaml
-catalog:
-  providers:
-    # highlight-add-start
-    kiali:
-      # Required. Kiali endpoint
-      url: ${KIALI_ENDPOINT}
-      # Required. Kiali authentication. Supported anonymous and token
-      strategy: ${KIALI_AUTH_STRATEGY}
-      # Optional. Required by token authentication
-      serviceAccountToken: ${KIALI_SERVICE_ACCOUNT_TOKEN}
-      # Optional. defaults false
-      skipTLSVerify: true
-      # Optional
-      caData: ${KIALI_CONFIG_CA_DATA}
-      # Optional. Local path to CA file
-      caFile: ''
-      # Optional. Time in seconds that session is enabled, defaults to 1 minute.
-      sessionTime: 60
-      # highlight-add-end
-```
+6. Add catalog
+
+   Add to locations in `app-config.local.yaml`
+
+   ```yaml
+   locations:
+     # Local example data for Kiali plugin
+     - type: file
+       target: ../../plugins/kiali/catalog-demo.yaml
+   ```
+
+7. Run `yarn start:backstage` from the project root.
+8. After create a new component, the Kiali tab should be enabled:
+
+![catalog-list](./images/kiali-tab-backstage.png)
 
 ## Configure auth
 
 ### Token authentication
 
-1. Set the parameters in app-config.yaml
+1. Set the parameters in app-config.local.yaml
 
-```yaml
-catalog:
-  providers:
-    # highlight-add-start
-    kiali:
-      # Required. Kiali endpoint
-      url: ${KIALI_ENDPOINT}
-      # Required. Kiali authentication. Supported anonymous and token
-      strategy: token
-      # Optional. Required by token authentication
-      serviceAccountToken: ${KIALI_SERVICE_ACCOUNT_TOKEN}
-      # Optional. defaults false
-      skipTLSVerify: true
-      # Optional
-```
+   ```yaml
+   catalog:
+     providers:
+       # highlight-add-start
+       kiali:
+         # Required. Kiali endpoint
+         url: ${KIALI_ENDPOINT}
+         # Optional. Required by token authentication
+         serviceAccountToken: ${KIALI_SERVICE_ACCOUNT_TOKEN}
+         # Optional. defaults false
+         skipTLSVerify: true
+         # Optional
+   ```
 
 2. To get `KIALI_SERVICE_ACCOUNT_TOKEN` create your service account and create the token
 
+   ```bash
+   kubectl create token $KIALI_SERVICE_ACCOUNT
+   ```
+
+   or if you installed kiali with the operator then execute
+
+   ```bash
+   export KIALI_SERVICE_ACCOUNT_TOKEN=$(kubectl describe secret $(kubectl get secret -n istio-system | grep kiali-service-account-token | cut -d" " -f1) -n istio-system | grep token: | cut -d ":" -f2 | sed 's/^ *//')
+   ```
+
+## Testing with Playwright
+
+To run the UI tests locally, take the following steps:
+
+First, install playwright dependencies:
+
 ```bash
-kubectl create token $KIALI_SERVICE_ACCOUNT
+$ yarn install --with-deps chromium
 ```
+
+The remaining steps need to be run in parallel.
+
+Launch the plugin:
+
+```bash
+$ cd plugins/${plugin} && yarn start
+```
+
+Finally, launch the UI tests (headless):
+
+```bash
+$ cd plugins/${plugin} && yarn run ui-test
+```
+
+If you wish to see the test runner UI, instead of headless:
+
+```bash
+$ cd plugins/${plugin} && yarn playwright test --ui
+```
+
+Test results from the headless run will be available in `plugins/${plugin}/playwright-report` folder.

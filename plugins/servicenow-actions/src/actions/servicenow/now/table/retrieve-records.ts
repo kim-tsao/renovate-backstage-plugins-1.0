@@ -24,7 +24,7 @@ const schemaInput = z.object({
     .string()
     .min(1)
     .describe('Name of the table from which to retrieve the records'),
-  sysparamQuery: z
+  sysparmQuery: z
     .string()
     .optional()
     .describe('An encoded query string used to filter the results'),
@@ -125,12 +125,16 @@ export const retrieveRecordsAction = (
 
       let res: ServiceNowResponses['200'];
       try {
-        res = (await DefaultService.getApiNowTable({
+        res = (await DefaultService.getApiNowTableByTableName({
           ...input,
           sysparmFields: input.sysparmFields?.join(','),
         })) as ServiceNowResponses['200'];
       } catch (error) {
-        throw new Error((error as ApiError).body.error.message);
+        const e = error as ApiError & {
+          body?: { error?: { message?: string } };
+        };
+
+        throw new Error(e.body?.error?.message);
       }
 
       ctx.output('result', res?.result);

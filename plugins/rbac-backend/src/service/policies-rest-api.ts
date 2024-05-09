@@ -16,21 +16,24 @@ import {
 } from '@backstage/plugin-permission-backend';
 import {
   AuthorizeResult,
-  ConditionalPolicyDecision,
   PermissionEvaluator,
   PolicyDecision,
   QueryPermissionRequest,
 } from '@backstage/plugin-permission-common';
-import { createPermissionIntegrationRouter } from '@backstage/plugin-permission-node';
+import {
+  createPermissionIntegrationRouter,
+  MetadataResponse,
+} from '@backstage/plugin-permission-node';
 
-import { Enforcer } from 'casbin';
 import { Router } from 'express';
 import { Request } from 'express-serve-static-core';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { ParsedQs } from 'qs';
 import { Logger } from 'winston';
 
 import {
+  PermissionAction,
+  PermissionInfo,
   policyEntityCreatePermission,
   policyEntityDeletePermission,
   policyEntityPermissions,
@@ -39,29 +42,38 @@ import {
   RESOURCE_TYPE_POLICY_ENTITY,
   Role,
   RoleBasedPolicy,
+  RoleConditionalPolicyDecision,
 } from '@janus-idp/backstage-plugin-rbac-common';
+import { PluginIdProvider } from '@janus-idp/backstage-plugin-rbac-node';
 
 import { ConditionalStorage } from '../database/conditional-storage';
+import {
+  daoToMetadata,
+  RoleMetadataDao,
+  RoleMetadataStorage,
+} from '../database/role-metadata';
+import { deepSortedEqual, isPermissionAction, policyToString } from '../helper';
+import { validateRoleCondition } from './condition-validation';
+import { EnforcerDelegate } from './enforcer-delegate';
 import { PluginPermissionMetadataCollector } from './plugin-endpoints';
 import {
   validateEntityReference,
   validatePolicy,
-  validateQueries,
   validateRole,
 } from './policies-validation';
-import { PluginIdProvider } from './policy-builder';
 
 export class PolicesServer {
   constructor(
     private readonly identity: IdentityApi,
     private readonly permissions: PermissionEvaluator,
     private readonly options: RouterOptions,
-    private readonly enforcer: Enforcer,
+    private readonly enforcer: EnforcerDelegate,
     private readonly config: Config,
     private readonly logger: Logger,
     private readonly discovery: PluginEndpointDiscovery,
     private readonly conditionalStorage: ConditionalStorage,
     private readonly pluginIdProvider: PluginIdProvider,
+    private readonly roleMetadata: RoleMetadataStorage,
   ) {}
 
   private async authorize(
@@ -94,8 +106,8 @@ export class PolicesServer {
     const pluginPermMetaData = new PluginPermissionMetadataCollector(
       this.discovery,
       this.pluginIdProvider,
-      this.config,
       this.logger,
+      this.config,
     );
 
     router.use(permissionsIntegrationRouter);
@@ -135,7 +147,7 @@ export class PolicesServer {
         policies = await this.enforcer.getPolicy();
       }
 
-      response.json(this.transformPolicyArray(...policies));
+      response.json(await this.transformPolicyArray(...policies));
     });
 
     router.get(
@@ -153,7 +165,7 @@ export class PolicesServer {
 
         const policy = await this.enforcer.getFilteredPolicy(0, entityRef);
         if (policy.length !== 0) {
-          response.json(this.transformPolicyArray(...policy));
+          response.json(await this.transformPolicyArray(...policy));
         } else {
           throw new NotFoundError(); // 404
         }
@@ -173,27 +185,18 @@ export class PolicesServer {
 
         const entityRef = this.getEntityReference(request);
 
-        const err = validateQueries(request);
-        if (err) {
-          throw new InputError( // 400
-            `Invalid policy definition. Cause: ${err.message}`,
-          );
+        const policyRaw: RoleBasedPolicy[] = request.body;
+        if (isEmpty(policyRaw)) {
+          throw new InputError(`permission policy must be present`); // 400
         }
 
-        const permission = this.getFirstQuery(request.query.permission!);
-        const policy = this.getFirstQuery(request.query.policy!);
-        const effect = this.getFirstQuery(request.query.effect!);
+        policyRaw.forEach(element => {
+          element.entityReference = entityRef;
+        });
 
-        const policyPermission = [entityRef, permission, policy, effect];
+        const processedPolicies = await this.processPolicies(policyRaw, true);
 
-        if (!(await this.enforcer.hasPolicy(...policyPermission))) {
-          throw new NotFoundError(); // 404
-        }
-
-        const isRemoved = await this.enforcer.removePolicy(...policyPermission);
-        if (!isRemoved) {
-          throw new Error('Unexpected error'); // 500
-        }
+        await this.enforcer.removePolicies(processedPolicies, 'rest');
         response.status(204).end();
       },
     );
@@ -207,24 +210,16 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const policyRaw: RoleBasedPolicy = request.body;
-      const err = validatePolicy(policyRaw);
-      if (err) {
-        throw new InputError( // 400
-          `Invalid policy definition. Cause: ${err.message}`,
-        );
+      const policyRaw: RoleBasedPolicy[] = request.body;
+
+      if (isEmpty(policyRaw)) {
+        throw new InputError(`permission policy must be present`); // 400
       }
 
-      const policy = this.transformPolicyToArray(policyRaw);
+      const processedPolicies = await this.processPolicies(policyRaw);
 
-      if (await this.enforcer.hasPolicy(...policy)) {
-        throw new ConflictError(); // 409
-      }
+      await this.enforcer.addPolicies(processedPolicies, 'rest');
 
-      const isAdded = await this.enforcer.addPolicy(...policy);
-      if (!isAdded) {
-        throw new Error('Unexpected error'); // 500
-      }
       response.status(201).end();
     });
 
@@ -241,57 +236,60 @@ export class PolicesServer {
 
         const entityRef = this.getEntityReference(request);
 
-        const oldPolicyRaw = request.body.oldPolicy;
-        if (!oldPolicyRaw) {
+        const oldPolicyRaw: RoleBasedPolicy[] = request.body.oldPolicy;
+        if (isEmpty(oldPolicyRaw)) {
           throw new InputError(`'oldPolicy' object must be present`); // 400
         }
-        const newPolicyRaw = request.body.newPolicy;
-        if (!newPolicyRaw) {
+        const newPolicyRaw: RoleBasedPolicy[] = request.body.newPolicy;
+        if (isEmpty(newPolicyRaw)) {
           throw new InputError(`'newPolicy' object must be present`); // 400
         }
 
-        oldPolicyRaw.entityReference = entityRef;
-        let err = validatePolicy(oldPolicyRaw);
-        if (err) {
-          throw new InputError( // 400
-            `Invalid old policy object. Cause: ${err.message}`,
+        [...oldPolicyRaw, ...newPolicyRaw].forEach(element => {
+          element.entityReference = entityRef;
+        });
+
+        const processedOldPolicy = await this.processPolicies(
+          oldPolicyRaw,
+          true,
+          'old policy',
+        );
+
+        oldPolicyRaw.sort((a, b) =>
+          a.permission === b.permission
+            ? this.nameSort(a.policy!, b.policy!)
+            : this.nameSort(a.permission!, b.permission!),
+        );
+
+        newPolicyRaw.sort((a, b) =>
+          a.permission === b.permission
+            ? this.nameSort(a.policy!, b.policy!)
+            : this.nameSort(a.permission!, b.permission!),
+        );
+
+        if (
+          isEqual(oldPolicyRaw, newPolicyRaw) &&
+          !oldPolicyRaw.some(isEmpty)
+        ) {
+          response.status(204).end();
+        } else if (oldPolicyRaw.length > newPolicyRaw.length) {
+          throw new InputError(
+            `'oldPolicy' object has more permission policies compared to 'newPolicy' object`,
           );
         }
-        newPolicyRaw.entityReference = entityRef;
-        err = validatePolicy(newPolicyRaw);
-        if (err) {
-          throw new InputError( // 400
-            `Invalid new policy object. Cause: ${err.message}`,
-          );
-        }
 
-        const oldPolicy = this.transformPolicyToArray(oldPolicyRaw);
-        const newPolicy = this.transformPolicyToArray(newPolicyRaw);
+        const processedNewPolicy = await this.processPolicies(
+          newPolicyRaw,
+          false,
+          'new policy',
+        );
 
-        if (await this.enforcer.hasPolicy(...newPolicy)) {
-          if (isEqual(oldPolicy, newPolicy)) {
-            response.status(204).end();
-            return;
-          }
-          throw new ConflictError(); // 409
-        }
-
-        if (!(await this.enforcer.hasPolicy(...oldPolicy))) {
-          throw new NotFoundError(); // 404
-        }
-
-        // enforcer.updatePolicy(oldPolicyPermission, newPolicyPermission) was not implemented
-        // for ORMTypeAdapter.
-        // So, let's compensate this combination delete + create.
-        const isRemoved = await this.enforcer.removePolicy(...oldPolicy);
-        if (!isRemoved) {
-          throw new Error('Unexpected error'); // 500
-        }
-
-        const isAdded = await this.enforcer.addPolicy(...newPolicy);
-        if (!isAdded) {
-          throw new Error('Unexpected error');
-        }
+        await this.enforcer.updatePolicies(
+          processedOldPolicy,
+          processedNewPolicy,
+          'rest',
+          false,
+        );
 
         response.status(200).end();
       },
@@ -310,7 +308,7 @@ export class PolicesServer {
 
       const roles = await this.enforcer.getGroupingPolicy();
 
-      response.json(this.transformRoleArray(...roles));
+      response.json(await this.transformRoleArray(...roles));
     });
 
     router.get('/roles/:kind/:namespace/:name', async (request, response) => {
@@ -321,7 +319,7 @@ export class PolicesServer {
       if (decision.result === AuthorizeResult.DENY) {
         throw new NotAllowedError(); // 403
       }
-      const roleEntityRef = this.getEntityReference(request);
+      const roleEntityRef = this.getEntityReference(request, true);
 
       const role = await this.enforcer.getFilteredGroupingPolicy(
         1,
@@ -329,13 +327,14 @@ export class PolicesServer {
       );
 
       if (role.length !== 0) {
-        response.json(this.transformRoleArray(...role));
+        response.json(await this.transformRoleArray(...role));
       } else {
         throw new NotFoundError(); // 404
       }
     });
 
     router.post('/roles', async (request, response) => {
+      const uniqueItems = new Set<string>();
       const decision = await this.authorize(request, {
         permission: policyEntityCreatePermission,
       });
@@ -353,21 +352,41 @@ export class PolicesServer {
 
       const roles = this.transformRoleToArray(roleRaw);
 
-      for (const role in roles) {
-        if (await this.enforcer.hasGroupingPolicy(...role)) {
+      for (const role of roles) {
+        if (
+          (await this.enforcer.hasGroupingPolicy(...role)) &&
+          !(await this.enforcer.hasFilteredPolicyMetadata(role, 'legacy'))
+        ) {
           throw new ConflictError(); // 409
+        }
+        const roleString = JSON.stringify(role);
+
+        if (uniqueItems.has(roleString)) {
+          throw new ConflictError(
+            `Duplicate role members found; ${role.at(0)}, ${role.at(
+              1,
+            )} is a duplicate`,
+          );
+        } else {
+          uniqueItems.add(roleString);
         }
       }
 
-      const isAdded = await this.enforcer.addGroupingPolicies(roles);
+      const user = await this.identity.getIdentity({ request });
+      const metadata: RoleMetadataDao = {
+        roleEntityRef: roleRaw.name,
+        source: 'rest',
+        description: roleRaw.metadata?.description ?? '',
+        author: user?.identity.userEntityRef,
+        modifiedBy: user?.identity.userEntityRef,
+      };
+      await this.enforcer.addGroupingPolicies(roles, metadata);
 
-      if (!isAdded) {
-        throw new Error('Unexpected error'); // 500
-      }
       response.status(201).end();
     });
 
     router.put('/roles/:kind/:namespace/:name', async (request, response) => {
+      const uniqueItems = new Set<string>();
       const decision = await this.authorize(request, {
         permission: policyEntityUpdatePermission,
       });
@@ -375,14 +394,14 @@ export class PolicesServer {
       if (decision.result === AuthorizeResult.DENY) {
         throw new NotAllowedError(); // 403
       }
-      const roleEntityRef = this.getEntityReference(request);
+      const roleEntityRef = this.getEntityReference(request, true);
 
-      const oldRoleRaw = request.body.oldRole;
+      const oldRoleRaw: Role = request.body.oldRole;
 
       if (!oldRoleRaw) {
         throw new InputError(`'oldRole' object must be present`); // 400
       }
-      const newRoleRaw = request.body.newRole;
+      const newRoleRaw: Role = request.body.newRole;
       if (!newRoleRaw) {
         throw new InputError(`'newRole' object must be present`); // 400
       }
@@ -403,6 +422,45 @@ export class PolicesServer {
 
       const oldRole = this.transformRoleToArray(oldRoleRaw);
       const newRole = this.transformRoleToArray(newRoleRaw);
+      // todo shell we allow newRole with an empty array?...
+
+      const user = await this.identity.getIdentity({ request });
+      const newMetadata: RoleMetadataDao = {
+        ...newRoleRaw.metadata,
+        source: newRoleRaw.metadata?.source ?? 'rest',
+        roleEntityRef: newRoleRaw.name,
+        modifiedBy: user?.identity.userEntityRef,
+      };
+
+      const oldMetadata =
+        await this.roleMetadata.findRoleMetadata(roleEntityRef);
+      if (!oldMetadata) {
+        throw new NotFoundError(`Unable to find metadata for ${roleEntityRef}`);
+      }
+      if (oldMetadata.source === 'csv-file') {
+        throw new Error(
+          `Role ${roleEntityRef} can be modified only using csv policy file.`,
+        );
+      }
+      if (oldMetadata.source === 'configuration') {
+        throw new Error(
+          `Role ${roleEntityRef} can be modified only using application config`,
+        );
+      }
+
+      if (
+        isEqual(oldRole, newRole) &&
+        deepSortedEqual(oldMetadata, newMetadata, [
+          'author',
+          'modifiedBy',
+          'createdAt',
+          'lastModified',
+        ])
+      ) {
+        // no content: old role and new role are equal and their metadata too
+        response.status(204).end();
+        return;
+      }
 
       for (const role of newRole) {
         const hasRole = oldRole.some(element => {
@@ -411,34 +469,49 @@ export class PolicesServer {
         // if the role is already part of old role and is a grouping policy we want to skip returning a conflict error
         // to allow for other roles to be checked and added
         if (await this.enforcer.hasGroupingPolicy(...role)) {
-          if (isEqual(oldRole, newRole)) {
-            response.status(204).end();
-            return;
-          }
           if (!hasRole) {
             throw new ConflictError(); // 409
           }
         }
-      }
+        const roleString = JSON.stringify(role);
 
-      for (const role of oldRole) {
-        if (!(await this.enforcer.hasGroupingPolicy(...role))) {
-          throw new NotFoundError(); // 404
+        if (uniqueItems.has(roleString)) {
+          throw new ConflictError(
+            `Duplicate role members found; ${role.at(0)}, ${role.at(
+              1,
+            )} is a duplicate`,
+          );
+        } else {
+          uniqueItems.add(roleString);
         }
       }
 
-      // enforcer.updateGroupingPolicy(oldRole, newRole) was not implemented
-      // for ORMTypeAdapter.
-      // So, let's compensate this combination delete + create.
-      const isRemoved = await this.enforcer.removeGroupingPolicies(oldRole);
-      if (!isRemoved) {
-        throw new Error('Unexpected error'); // 500
+      uniqueItems.clear();
+      for (const role of oldRole) {
+        if (!(await this.enforcer.hasGroupingPolicy(...role))) {
+          throw new NotFoundError(
+            `Member reference: ${role[0]} was not found for role ${roleEntityRef}`,
+          ); // 404
+        }
+        const roleString = JSON.stringify(role);
+
+        if (uniqueItems.has(roleString)) {
+          throw new ConflictError(
+            `Duplicate role members found; ${role.at(0)}, ${role.at(
+              1,
+            )} is a duplicate`,
+          );
+        } else {
+          uniqueItems.add(roleString);
+        }
       }
 
-      const isAdded = await this.enforcer.addGroupingPolicies(newRole);
-      if (!isAdded) {
-        throw new Error('Unexpected error');
-      }
+      await this.enforcer.updateGroupingPolicies(
+        oldRole,
+        newRole,
+        newMetadata,
+        false,
+      );
 
       response.status(200).end();
     });
@@ -446,7 +519,7 @@ export class PolicesServer {
     router.delete(
       '/roles/:kind/:namespace/:name',
       async (request, response) => {
-        let roles = [];
+        let roleMembers = [];
         const decision = await this.authorize(request, {
           permission: policyEntityDeletePermission,
         });
@@ -455,37 +528,53 @@ export class PolicesServer {
           throw new NotAllowedError(); // 403
         }
 
-        const roleEntityRef = this.getEntityReference(request);
+        const roleEntityRef = this.getEntityReference(request, true);
 
         if (request.query.memberReferences) {
           const memberReferences = this.getFirstQuery(
             request.query.memberReferences!,
           );
-
-          roles.push([memberReferences, roleEntityRef]);
+          roleMembers.push([memberReferences, roleEntityRef]);
         } else {
-          roles = await this.enforcer.getFilteredGroupingPolicy(
+          roleMembers = await this.enforcer.getFilteredGroupingPolicy(
             1,
             roleEntityRef,
           );
         }
 
-        for (const role of roles) {
+        for (const role of roleMembers) {
           if (!(await this.enforcer.hasGroupingPolicy(...role))) {
             throw new NotFoundError(); // 404
           }
         }
 
-        const isRemoved = await this.enforcer.removeGroupingPolicies(roles);
-        if (!isRemoved) {
-          throw new Error('Unexpected error'); // 500
+        const metadata =
+          await this.roleMetadata.findRoleMetadata(roleEntityRef);
+        if (metadata?.source === 'csv-file') {
+          throw new Error(
+            `Role ${roleEntityRef} can be modified only using csv policy file.`,
+          );
         }
+        if (metadata?.source === 'configuration') {
+          throw new Error(
+            `Pre-defined role ${roleEntityRef} is reserved and can not be modified.`,
+          );
+        }
+
+        const user = await this.identity.getIdentity({ request });
+        await this.enforcer.removeGroupingPolicies(
+          roleMembers,
+          'rest',
+          user?.identity.userEntityRef,
+          false,
+        );
+
         response.status(204).end();
       },
     );
 
-    router.get('/plugins/policies', async (req, resp) => {
-      const decision = await this.authorize(req, {
+    router.get('/plugins/policies', async (request, response) => {
+      const decision = await this.authorize(request, {
         permission: policyEntityReadPermission,
       });
 
@@ -493,12 +582,15 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const policies = await pluginPermMetaData.getPluginPolicies();
-      resp.json(policies);
+      const authHeader = request.header('authorization');
+      const token = getBearerTokenFromAuthorizationHeader(authHeader);
+
+      const policies = await pluginPermMetaData.getPluginPolicies(token);
+      response.json(policies);
     });
 
-    router.get('/plugins/condition-rules', async (req, resp) => {
-      const decision = await this.authorize(req, {
+    router.get('/plugins/condition-rules', async (request, response) => {
+      const decision = await this.authorize(request, {
         permission: policyEntityReadPermission,
       });
 
@@ -506,12 +598,15 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const rules = await pluginPermMetaData.getPluginConditionRules();
-      resp.json(rules);
+      const authHeader = request.header('authorization');
+      const token = getBearerTokenFromAuthorizationHeader(authHeader);
+
+      const rules = await pluginPermMetaData.getPluginConditionRules(token);
+      response.json(rules);
     });
 
-    router.get('/conditions', async (req, resp) => {
-      const decision = await this.authorize(req, {
+    router.get('/roles/conditions', async (request, response) => {
+      const decision = await this.authorize(request, {
         permission: policyEntityReadPermission,
       });
 
@@ -519,18 +614,25 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const pluginId = this.getFirstQuery(req.query.pluginId);
-      const resourceType = this.getFirstQuery(req.query.resourceType);
-      const conditions = await this.conditionalStorage.getConditions(
-        pluginId,
-        resourceType,
+      const conditions = await this.conditionalStorage.filterConditions(
+        this.getFirstQuery(request.query.roleEntityRef),
+        this.getFirstQuery(request.query.pluginId),
+        this.getFirstQuery(request.query.resourceType),
+        this.getActionQueries(request.query.actions),
       );
 
-      resp.json(conditions);
+      const result: RoleConditionalPolicyDecision<PermissionAction>[] =
+        conditions.map(condition => {
+          return {
+            ...condition,
+            permissionMapping: condition.permissionMapping.map(pm => pm.action),
+          };
+        });
+      response.json(result);
     });
 
-    router.post('/conditions', async (req, resp) => {
-      const decision = await this.authorize(req, {
+    router.post('/roles/conditions', async (request, response) => {
+      const decision = await this.authorize(request, {
         permission: policyEntityCreatePermission,
       });
 
@@ -538,16 +640,24 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const conditionalPolicy: ConditionalPolicyDecision = req.body;
-      // TODO add validation.
-      const id =
-        await this.conditionalStorage.createCondition(conditionalPolicy);
+      const roleConditionPolicy: RoleConditionalPolicyDecision<PermissionAction> =
+        request.body;
+      validateRoleCondition(roleConditionPolicy);
 
-      resp.status(201).json({ id: id });
+      const conditionToCreate = await this.processConditionMapping(
+        roleConditionPolicy,
+        request,
+        pluginPermMetaData,
+      );
+
+      const id =
+        await this.conditionalStorage.createCondition(conditionToCreate);
+
+      response.status(201).json({ id: id });
     });
 
-    router.get('/conditions/:id', async (req, resp) => {
-      const decision = await this.authorize(req, {
+    router.get('/roles/conditions/:id', async (request, response) => {
+      const decision = await this.authorize(request, {
         permission: policyEntityReadPermission,
       });
 
@@ -555,7 +665,7 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const id: number = parseInt(req.params.id, 10);
+      const id: number = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         throw new InputError('Id is not a valid number.');
       }
@@ -565,11 +675,16 @@ export class PolicesServer {
         throw new NotFoundError();
       }
 
-      resp.json(condition);
+      const result: RoleConditionalPolicyDecision<PermissionAction> = {
+        ...condition,
+        permissionMapping: condition.permissionMapping.map(pm => pm.action),
+      };
+
+      response.json(result);
     });
 
-    router.delete('/conditions/:id', async (req, resp) => {
-      const decision = await this.authorize(req, {
+    router.delete('/roles/conditions/:id', async (request, response) => {
+      const decision = await this.authorize(request, {
         permission: policyEntityDeletePermission,
       });
 
@@ -577,17 +692,17 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const id: number = parseInt(req.params.id, 10);
+      const id: number = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         throw new InputError('Id is not a valid number.');
       }
 
       await this.conditionalStorage.deleteCondition(id);
-      resp.status(204).end();
+      response.status(204).end();
     });
 
-    router.put('/conditions/:id', async (req, resp) => {
-      const decision = await this.authorize(req, {
+    router.put('/roles/conditions/:id', async (request, response) => {
+      const decision = await this.authorize(request, {
         permission: policyEntityUpdatePermission,
       });
 
@@ -595,26 +710,36 @@ export class PolicesServer {
         throw new NotAllowedError(); // 403
       }
 
-      const id: number = parseInt(req.params.id, 10);
+      const id: number = parseInt(request.params.id, 10);
       if (isNaN(id)) {
         throw new InputError('Id is not a valid number.');
       }
-      const conditionalPolicy: ConditionalPolicyDecision = req.body;
 
-      await this.conditionalStorage.updateCondition(id, conditionalPolicy);
-      resp.status(200).end();
+      const roleConditionPolicy: RoleConditionalPolicyDecision<PermissionAction> =
+        request.body;
+
+      validateRoleCondition(roleConditionPolicy);
+
+      const conditionToUpdate = await this.processConditionMapping(
+        roleConditionPolicy,
+        request,
+        pluginPermMetaData,
+      );
+
+      await this.conditionalStorage.updateCondition(id, conditionToUpdate);
+      response.status(200).end();
     });
 
     return router;
   }
 
-  getEntityReference(request: Request): string {
+  getEntityReference(request: Request, role?: boolean): string {
     const kind = request.params.kind;
     const namespace = request.params.namespace;
     const name = request.params.name;
     const entityRef = `${kind}:${namespace}/${name}`;
 
-    const err = validateEntityReference(entityRef);
+    const err = validateEntityReference(entityRef, role);
     if (err) {
       throw new InputError(err.message);
     }
@@ -622,14 +747,26 @@ export class PolicesServer {
     return entityRef;
   }
 
-  transformPolicyArray(...policies: string[][]): RoleBasedPolicy[] {
-    return policies.map((p: string[]) => {
+  async transformPolicyArray(
+    ...policies: string[][]
+  ): Promise<RoleBasedPolicy[]> {
+    const roleBasedPolices: RoleBasedPolicy[] = [];
+    for (const p of policies) {
       const [entityReference, permission, policy, effect] = p;
-      return { entityReference, permission, policy, effect };
-    });
+      const metadata = await this.enforcer.getMetadata(p);
+      roleBasedPolices.push({
+        entityReference,
+        permission,
+        policy,
+        effect,
+        metadata,
+      });
+    }
+
+    return roleBasedPolices;
   }
 
-  transformRoleArray(...roles: string[][]): Role[] {
+  async transformRoleArray(...roles: string[][]): Promise<Role[]> {
     const combinedRoles: { [key: string]: string[] } = {};
 
     roles.forEach(([value, role]) => {
@@ -640,10 +777,16 @@ export class PolicesServer {
       }
     });
 
-    const result: Role[] = Object.entries(combinedRoles).map(
-      ([role, value]) => {
-        return { memberReferences: value, name: role };
-      },
+    const result: Role[] = await Promise.all(
+      Object.entries(combinedRoles).map(async ([role, value]) => {
+        const metadataDao = await this.roleMetadata.findRoleMetadata(role);
+        const metadata = metadataDao ? daoToMetadata(metadataDao) : undefined;
+        return Promise.resolve({
+          memberReferences: value,
+          name: role,
+          metadata,
+        });
+      }),
     );
     return result;
   }
@@ -663,6 +806,37 @@ export class PolicesServer {
       roles.push([entity, role.name]);
     }
     return roles;
+  }
+
+  getActionQueries(
+    queryValue: string | string[] | ParsedQs | ParsedQs[] | undefined,
+  ): PermissionAction[] | undefined {
+    if (!queryValue) {
+      return undefined;
+    }
+    if (Array.isArray(queryValue)) {
+      const permissionNames: PermissionAction[] = [];
+      for (const permissionQuery of queryValue) {
+        if (
+          typeof permissionQuery === 'string' &&
+          isPermissionAction(permissionQuery)
+        ) {
+          permissionNames.push(permissionQuery);
+        } else {
+          throw new InputError(
+            `Invalid permission action query value: ${permissionQuery}. Permission name should be string.`,
+          );
+        }
+      }
+      return permissionNames;
+    }
+
+    if (typeof queryValue === 'string' && isPermissionAction(queryValue)) {
+      return [queryValue];
+    }
+    throw new InputError(
+      `Invalid permission action query value: ${queryValue}. Permission name should be string.`,
+    );
   }
 
   getFirstQuery(
@@ -691,5 +865,115 @@ export class PolicesServer {
       !!request.query.policy ||
       !!request.query.effect
     );
+  }
+
+  async processPolicies(
+    policyArray: RoleBasedPolicy[],
+    isOld?: boolean,
+    errorMessage?: string,
+  ): Promise<string[][]> {
+    const policies: string[][] = [];
+    const uniqueItems = new Set<string>();
+    for (const policy of policyArray) {
+      const err = validatePolicy(policy);
+      if (err) {
+        throw new InputError(
+          `Invalid ${errorMessage ?? 'policy'} definition. Cause: ${
+            err.message
+          }`,
+        ); // 400
+      }
+
+      const transformedPolicy = this.transformPolicyToArray(policy);
+      if (isOld && !(await this.enforcer.hasPolicy(...transformedPolicy))) {
+        throw new NotFoundError(
+          `Policy '${policyToString(transformedPolicy)}' not found`,
+        ); // 404
+      }
+
+      if (
+        !isOld &&
+        (await this.enforcer.hasPolicy(...transformedPolicy)) &&
+        !(await this.enforcer.hasFilteredPolicyMetadata(
+          transformedPolicy,
+          'legacy',
+        ))
+      ) {
+        throw new ConflictError(
+          `Policy '${policyToString(
+            transformedPolicy,
+          )}' has been already stored`,
+        ); // 409
+      }
+
+      // We want to ensure that there are not duplicate permission policies
+      const rowString = JSON.stringify(transformedPolicy);
+      if (uniqueItems.has(rowString)) {
+        throw new ConflictError(
+          `Duplicate polices found; ${policy.entityReference}, ${policy.permission}, ${policy.policy}, ${policy.effect} is a duplicate`,
+        );
+      } else {
+        uniqueItems.add(rowString);
+        policies.push(transformedPolicy);
+      }
+    }
+    return policies;
+  }
+
+  nameSort(nameA: string, nameB: string): number {
+    if (nameA.toUpperCase() < nameB.toUpperCase()) {
+      return -1;
+    }
+    if (nameA.toUpperCase() > nameB.toUpperCase()) {
+      return 1;
+    }
+    return 0;
+  }
+
+  async processConditionMapping(
+    roleConditionPolicy: RoleConditionalPolicyDecision<PermissionAction>,
+    request: Request,
+    pluginPermMetaData: PluginPermissionMetadataCollector,
+  ): Promise<RoleConditionalPolicyDecision<PermissionInfo>> {
+    const token = getBearerTokenFromAuthorizationHeader(
+      request.header('authorization'),
+    );
+    const rule: MetadataResponse | undefined =
+      await pluginPermMetaData.getMetadataByPluginId(
+        roleConditionPolicy.pluginId,
+        token,
+      );
+    if (!rule?.permissions) {
+      throw new Error(
+        `Unable to get permission list for plugin ${roleConditionPolicy.pluginId}`,
+      );
+    }
+
+    const permInfo: PermissionInfo[] = [];
+    for (const action of roleConditionPolicy.permissionMapping) {
+      const perm = rule.permissions.find(
+        permission =>
+          permission.type === 'resource' &&
+          action === permission.attributes.action,
+      );
+      if (!perm) {
+        throw new Error(
+          `Unable to find permission to get permission name for resource type '${
+            roleConditionPolicy.resourceType
+          }' and action ${JSON.stringify(action)}`,
+        );
+      }
+      console.log(
+        `Found permission ${JSON.stringify(perm)} for resource type ${
+          roleConditionPolicy.resourceType
+        } and action ${action}`,
+      );
+      permInfo.push({ name: perm.name, action });
+    }
+
+    return {
+      ...roleConditionPolicy,
+      permissionMapping: permInfo,
+    };
   }
 }

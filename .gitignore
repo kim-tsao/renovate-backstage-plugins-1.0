@@ -35,6 +35,7 @@ dist-scalprum
 /plugins/*/dist-dynamic/*
 !/plugins/*/dist-dynamic/package.json
 !/plugins/*/dist-dynamic/yarn.lock
+storybook-static
 
 # Temporary change files created by Vim
 *.swp
@@ -51,8 +52,22 @@ site
 # vscode database functionality support files
 *.session.sql
 
+.vscode
+
 # turbo
 .turbo
 
+# idea
+.idea
+*.iml
+
 # build cache
 .webpack-cache
+
+.tmp
+
+# playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

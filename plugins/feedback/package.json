@@ -1,0 +1,75 @@
+{
+  "name": "@janus-idp/backstage-plugin-feedback",
+  "version": "1.1.6",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.esm.js",
+    "types": "dist/index.d.ts"
+  },
+  "backstage": {
+    "role": "frontend-plugin"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "start": "backstage-cli package start",
+    "build": "backstage-cli package build",
+    "lint": "backstage-cli package lint",
+    "test": "backstage-cli package test --passWithNoTests --coverage",
+    "clean": "backstage-cli package clean",
+    "prepack": "backstage-cli package prepack",
+    "postpack": "backstage-cli package postpack",
+    "tsc": "tsc",
+    "export-dynamic": "janus-cli package export-dynamic-plugin"
+  },
+  "dependencies": {
+    "@backstage/catalog-model": "^1.4.5",
+    "@backstage/config": "^1.2.0",
+    "@backstage/core-components": "^0.14.3",
+    "@backstage/core-plugin-api": "^1.9.1",
+    "@backstage/plugin-catalog-react": "^1.11.2",
+    "@backstage/theme": "^0.5.2",
+    "@material-ui/core": "^4.9.13",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.61",
+    "@one-platform/opc-feedback": "0.1.1-alpha",
+    "axios": "^1.6.4",
+    "react-use": "^17.2.4"
+  },
+  "peerDependencies": {
+    "react": "^16.13.1 || ^17.0.0 || ^18.2.0"
+  },
+  "devDependencies": {
+    "@backstage/cli": "0.26.2",
+    "@backstage/core-app-api": "1.12.3",
+    "@backstage/dev-utils": "1.0.30",
+    "@backstage/test-utils": "1.5.3",
+    "@janus-idp/cli": "1.8.5",
+    "@testing-library/jest-dom": "6.4.2",
+    "@testing-library/react": "14.2.1",
+    "@testing-library/user-event": "14.0.0",
+    "msw": "1.0.0"
+  },
+  "files": [
+    "app-config.janus-idp.yaml",
+    "dist",
+    "config.d.ts",
+    "dist-scalprum"
+  ],
+  "configSchema": "config.d.ts",
+  "repository": "github:janus-idp/backstage-plugins",
+  "keywords": [
+    "backstage",
+    "plugin"
+  ],
+  "scalprum": {
+    "name": "janus-idp.backstage-plugin-feedback",
+    "exposedModules": {
+      "PluginRoot": "./src/index.ts"
+    }
+  },
+  "homepage": "https://janus-idp.io/",
+  "bugs": "https://github.com/janus-idp/backstage-plugins/issues"
+}

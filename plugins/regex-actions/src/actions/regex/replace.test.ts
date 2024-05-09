@@ -1,9 +1,4 @@
-import { getVoidLogger } from '@backstage/backend-common';
-
-import mockFs from 'mock-fs';
-
-import os from 'os';
-import { Writable } from 'stream';
+import { createMockActionContext } from '@backstage/plugin-scaffolder-node-test-utils';
 
 import { createReplaceAction } from './replace';
 
@@ -18,27 +13,10 @@ import { createReplaceAction } from './replace';
 describe('regex:replace', () => {
   const action = createReplaceAction();
 
-  const logStream = {
-    write: jest.fn(),
-  } as jest.Mocked<Partial<Writable>> as jest.Mocked<Writable>;
-
-  const mockTmpDir = os.tmpdir();
-  const mockContext = {
-    input: {},
-    baseUrl: 'somebase',
-    workspacePath: mockTmpDir,
-    logger: getVoidLogger(),
-    logStream,
-    output: jest.fn(),
-    createTemporaryDirectory: jest.fn().mockResolvedValue(mockTmpDir),
-  };
+  const mockContext = createMockActionContext();
 
   beforeEach(() => {
     jest.resetAllMocks();
-  });
-
-  afterEach(() => {
-    mockFs.restore();
   });
 
   it('should complete a simple regex', async () => {
@@ -87,7 +65,7 @@ describe('regex:replace', () => {
         {
           pattern: 'Dog',
           replacement: 'ferret',
-          flags: ['i'] as any,
+          flags: ['i'] as 'i'[],
           values: [
             {
               key: 'eg2',
@@ -120,7 +98,7 @@ describe('regex:replace', () => {
         {
           pattern: 'dog',
           replacement: 'monkey',
-          flags: ['g'] as any,
+          flags: ['g'] as ('g' | 'i')[],
           values: [
             {
               key: 'eg1',
@@ -131,7 +109,7 @@ describe('regex:replace', () => {
         {
           pattern: 'Dog',
           replacement: 'ferret',
-          flags: ['g', 'i'] as any,
+          flags: ['g', 'i'] as ('g' | 'i')[],
           values: [
             {
               key: 'eg2',

@@ -1,0 +1,96 @@
+{
+  "name": "@janus-idp/backstage-plugin-orchestrator-backend",
+  "version": "1.7.4",
+  "license": "Apache-2.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "publishConfig": {
+    "access": "public",
+    "main": "dist/index.cjs.js",
+    "types": "dist/index.d.ts"
+  },
+  "backstage": {
+    "role": "backend-plugin"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./alpha": "./src/alpha.ts",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "alpha": [
+        "src/alpha.ts"
+      ],
+      "package.json": [
+        "package.json"
+      ]
+    }
+  },
+  "homepage": "https://janus-idp.io/",
+  "repository": "github:janus-idp/backstage-plugins",
+  "bugs": "https://github.com/janus-idp/backstage-plugins/issues",
+  "keywords": [
+    "backstage",
+    "plugin",
+    "orchestrator",
+    "workflows"
+  ],
+  "files": [
+    "app-config.janus-idp.yaml",
+    "dist",
+    "dist-dynamic/*.*",
+    "dist-dynamic/dist/**",
+    "dist-dynamic/alpha/*",
+    "static"
+  ],
+  "scripts": {
+    "start": "backstage-cli package start",
+    "build": "backstage-cli package build",
+    "tsc": "tsc",
+    "lint": "backstage-cli package lint",
+    "test": "backstage-cli package test --passWithNoTests --coverage",
+    "clean": "backstage-cli package clean",
+    "prepack": "backstage-cli package prepack",
+    "postpack": "backstage-cli package postpack",
+    "postversion": "yarn run export-dynamic",
+    "export-dynamic": "janus-cli package export-dynamic-plugin"
+  },
+  "dependencies": {
+    "@backstage/backend-app-api": "^0.6.2",
+    "@backstage/backend-common": "^0.21.6",
+    "@backstage/backend-dynamic-feature-service": "^0.2.8",
+    "@backstage/backend-plugin-api": "^0.6.16",
+    "@backstage/backend-tasks": "^0.5.21",
+    "@backstage/catalog-client": "^1.6.3",
+    "@backstage/config": "^1.2.0",
+    "@backstage/core-plugin-api": "^1.9.1",
+    "@backstage/integration": "^1.9.1",
+    "@backstage/plugin-catalog-node": "^1.11.0",
+    "@backstage/plugin-events-backend": "^0.3.3",
+    "@backstage/plugin-events-node": "^0.3.2",
+    "@backstage/plugin-scaffolder-backend": "^1.22.3",
+    "@backstage/plugin-scaffolder-node": "^0.4.2",
+    "@backstage/types": "^1.1.1",
+    "@janus-idp/backstage-plugin-orchestrator-common": "1.6.4",
+    "@urql/core": "^4.1.4",
+    "ajv-formats": "^2.1.1",
+    "cloudevents": "^8.0.0",
+    "express": "^4.18.2",
+    "express-promise-router": "^4.1.1",
+    "fs-extra": "^10.1.0",
+    "json-schema": "^0.4.0",
+    "moment": "^2.29.4",
+    "openapi-backend": "^5.10.5",
+    "winston": "^3.11.0",
+    "yn": "^5.0.0"
+  },
+  "devDependencies": {
+    "@backstage/backend-test-utils": "0.3.6",
+    "@backstage/cli": "0.26.2",
+    "@janus-idp/cli": "1.8.5",
+    "@types/express": "4.17.20",
+    "@types/fs-extra": "11.0.1",
+    "@types/json-schema": "7.0.12"
+  }
+}

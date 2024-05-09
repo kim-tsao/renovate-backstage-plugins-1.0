@@ -1,10 +1,20 @@
 import {
+  TaskRunResultsAnnotations,
+  TaskRunResultsKeyValue,
+  TaskRunResultsTypeValue,
+} from '@aonic-ui/pipelines';
+
+import {
   ComputedStatus,
   pipelineRunFilterReducer,
   TaskRunKind,
 } from '@janus-idp/shared-react';
 
-import { TEKTON_PIPELINE_TASK } from '../consts/tekton-const';
+import {
+  TEKTON_PIPELINE_RUN,
+  TEKTON_PIPELINE_TASK,
+} from '../consts/tekton-const';
+import { OutputTaskRunGroup } from '../types/output';
 
 export type TaskStep = {
   id: string;
@@ -49,3 +59,62 @@ export const getActiveTaskRun = (
   activeTask
     ? taskRuns.find(taskRun => taskRun?.id === activeTask)?.id
     : taskRuns[taskRuns.length - 1]?.id;
+
+const checkTypeAnnotation = (
+  tr: TaskRunKind | undefined,
+  type: TaskRunResultsTypeValue,
+): boolean =>
+  tr?.metadata?.annotations?.[TaskRunResultsAnnotations.TYPE] === type;
+
+export const isSbomTaskRun = (tr: TaskRunKind | undefined): boolean =>
+  tr?.metadata?.annotations?.[TaskRunResultsAnnotations.KEY] ===
+  TaskRunResultsKeyValue.SBOM;
+
+export const isECTaskRun = (tr: TaskRunKind | undefined): boolean =>
+  checkTypeAnnotation(tr, TaskRunResultsTypeValue.EC);
+
+export const isACSImageScanTaskRun = (tr: TaskRunKind | undefined): boolean =>
+  checkTypeAnnotation(tr, TaskRunResultsTypeValue.ROXCTL_IMAGE_SCAN);
+
+export const isACSImageCheckTaskRun = (tr: TaskRunKind | undefined): boolean =>
+  checkTypeAnnotation(tr, TaskRunResultsTypeValue.ROXCTL_IMAGE_CHECK);
+
+export const isACSDeploymentCheckTaskRun = (
+  tr: TaskRunKind | undefined,
+): boolean =>
+  checkTypeAnnotation(tr, TaskRunResultsTypeValue.ROXCTL_DEPLOYMENT_CHECK);
+
+export const getTaskrunsOutputGroup = (
+  pipelineRunName: string | undefined,
+  taskruns: TaskRunKind[],
+): OutputTaskRunGroup => {
+  const getPLRTaskRunByType = (
+    check: (tr: TaskRunKind | undefined) => boolean,
+  ): TaskRunKind | undefined =>
+    taskruns?.find(
+      (tr: TaskRunKind) =>
+        tr?.metadata?.labels?.[TEKTON_PIPELINE_RUN] === pipelineRunName &&
+        check(tr),
+    );
+
+  return {
+    sbomTaskRun: getPLRTaskRunByType(isSbomTaskRun),
+    ecTaskRun: getPLRTaskRunByType(isECTaskRun),
+    acsImageScanTaskRun: getPLRTaskRunByType(isACSImageScanTaskRun),
+    acsImageCheckTaskRun: getPLRTaskRunByType(isACSImageCheckTaskRun),
+    acsDeploymentCheckTaskRun: getPLRTaskRunByType(isACSDeploymentCheckTaskRun),
+  };
+};
+
+export const hasExternalLink = (
+  sbomTaskRun: TaskRunKind | undefined,
+): boolean =>
+  sbomTaskRun?.metadata?.annotations?.[TaskRunResultsAnnotations.TYPE] ===
+  TaskRunResultsTypeValue.EXTERNAL_LINK;
+
+export const getSbomLink = (
+  sbomTaskRun: TaskRunKind | undefined,
+): string | undefined =>
+  (sbomTaskRun?.status?.results || sbomTaskRun?.status?.taskResults)?.find(
+    r => r.name === TaskRunResultsKeyValue.SBOM,
+  )?.value;

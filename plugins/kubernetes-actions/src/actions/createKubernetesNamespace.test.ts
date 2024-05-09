@@ -1,14 +1,14 @@
-import { getVoidLogger } from '@backstage/backend-common';
 import { CatalogClient } from '@backstage/catalog-client';
+import { createMockActionContext } from '@backstage/plugin-scaffolder-node-test-utils';
 
 import { V1Namespace } from '@kubernetes/client-node';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 
-import os from 'os';
-import { PassThrough } from 'stream';
-
-import { createKubernetesNamespaceAction } from './createKubernetesNamespace';
+import {
+  convertLabelsToObject,
+  createKubernetesNamespaceAction,
+} from './createKubernetesNamespace';
 
 const LOCAL_ADDR = 'http://localhost:5000';
 const FIXTURES_DIR = `${__dirname}/../../__fixtures__/cluster-entities`;
@@ -64,13 +64,7 @@ describe('kubernetes:create-namespace', () => {
     getEntityByRef: catalogClientFn,
   } as unknown as CatalogClient);
 
-  const mockContext = {
-    workspacePath: os.tmpdir(),
-    logger: getVoidLogger(),
-    logStream: new PassThrough(),
-    output: jest.fn(),
-    createTemporaryDirectory: jest.fn(),
-  };
+  const mockContext = createMockActionContext();
 
   it('should get the api url from the correct entity', async () => {
     await action.handler({
@@ -222,5 +216,33 @@ describe('kubernetes:create-namespace', () => {
         },
       });
     }).rejects.toThrow('Cluster reference or url are required');
+  });
+});
+
+describe('convertLabelsToObject', () => {
+  test('converts labels string to object', () => {
+    const labelsString = 'key1=value1;key2=value2;key3=value3';
+    const expectedObject = {
+      key1: 'value1',
+      key2: 'value2',
+      key3: 'value3',
+    };
+    expect(convertLabelsToObject(labelsString)).toEqual(expectedObject);
+  });
+
+  test('handles empty string', () => {
+    expect(convertLabelsToObject('')).toEqual({});
+  });
+
+  test('handles invalid input', () => {
+    // No '=' in the string
+    expect(convertLabelsToObject('key1value1;')).toEqual({});
+  });
+
+  test('handles invalid labels', () => {
+    // Label without '='
+    expect(convertLabelsToObject('key1value1;key2=value2;=value3')).toEqual({
+      key2: 'value2',
+    });
   });
 });

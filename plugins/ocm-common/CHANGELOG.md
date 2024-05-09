@@ -1,3 +1,27 @@
+## @janus-idp/backstage-plugin-ocm-common [3.0.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-ocm-common@2.3.0...@janus-idp/backstage-plugin-ocm-common@3.0.0) (2024-05-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ocm:** add basic permissions to ocm backend plugin (#1528)
+
+### Features
+
+* **ocm:** add basic permissions to ocm backend plugin ([#1528](https://github.com/janus-idp/backstage-plugins/issues/1528)) ([c28d564](https://github.com/janus-idp/backstage-plugins/commit/c28d5643034912228425930a42b60bbe4bc8a8ec))
+
+## @janus-idp/backstage-plugin-ocm-common [2.3.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-ocm-common@2.2.4...@janus-idp/backstage-plugin-ocm-common@2.3.0) (2024-04-15)
+
+
+### Features
+
+* checkPluginVersion.sh bump plugins for 1.2.0 release ([#1511](https://github.com/janus-idp/backstage-plugins/issues/1511)) ([73c6588](https://github.com/janus-idp/backstage-plugins/commit/73c6588adb7e8c20907b06f2a8ef248cfd4332e4))
+
+## @janus-idp/backstage-plugin-ocm-common [2.2.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-ocm-common@2.2.3...@janus-idp/backstage-plugin-ocm-common@2.2.4) (2024-04-05)
+
+## @janus-idp/backstage-plugin-ocm-common [2.2.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-ocm-common@2.2.2...@janus-idp/backstage-plugin-ocm-common@2.2.3) (2024-03-29)
+
+## @janus-idp/backstage-plugin-ocm-common [2.2.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-ocm-common@2.2.1...@janus-idp/backstage-plugin-ocm-common@2.2.2) (2024-02-21)
+
 ## @janus-idp/backstage-plugin-ocm-common [2.2.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-ocm-common@2.2.0...@janus-idp/backstage-plugin-ocm-common@2.2.1) (2023-10-19)
 
 ## @janus-idp/backstage-plugin-ocm-common [2.2.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-ocm-common@2.1.1...@janus-idp/backstage-plugin-ocm-common@2.2.0) (2023-08-14)

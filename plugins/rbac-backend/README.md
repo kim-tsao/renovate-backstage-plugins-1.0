@@ -16,8 +16,6 @@ To effectively utilize the RBAC plugin, you must have the Backstage permission f
 
 You need to [set up the permission framework in Backstage](https://backstage.io/docs/permissions/getting-started/).Since this plugin provides a dynamic policy that replaces the traditional one, there's no need to create a policy manually. Please note that one of the requirements for permission framework is enabling the [service-to-service authentication](https://backstage.io/docs/auth/service-to-service-auth/#setup). Ensure that you complete these authentication setup steps as well.
 
-Note: Red Hat Developer Hub users enjoy the benefit of Permission Framework and backend-to-backend authentication being enabled by default
-
 ### Identity resolver
 
 The permission framework, and consequently, this RBAC plugin, rely on the concept of group membership. To ensure smooth operation, please follow the [Sign-in identities and resolvers](https://backstage.io/docs/auth/identity-resolver/) documentation. It's crucial that when populating groups, you include any groups that you plan to assign permissions to.
@@ -34,11 +32,70 @@ Add the RBAC plugin packages as dependencies by running the following command.
 yarn workspace backend add @janus-idp/backstage-plugin-rbac-backend
 ```
 
-NOTE: If you are using Red Hat Developer Hub backend plugin is pre-installed and you do not need this step.
+**NOTE**: If you are using Red Hat Developer Hub backend plugin is pre-installed and you do not need this step.
+
+### Configuring the Backend
+
+To connect the RBAC framework to your backend use the `PolicyBuilder` class in your backend permissions plugin (typically `packages/backend/src/plugins/permissions.ts`) as follows:
+
+```ts
+/* highlight-add-start */
+import { Router } from 'express';
+
+import {
+  PluginIdProvider,
+  PolicyBuilder,
+} from '@janus-idp/backstage-plugin-rbac-backend';
+
+import { PluginEnvironment } from '../types';
+
+export default async function createPlugin(
+  env: PluginEnvironment,
+  pluginIdProvider: PluginIdProvider,
+): Promise<Router> {
+  return PolicyBuilder.build(
+    {
+      config: env.config,
+      logger: env.logger,
+      discovery: env.discovery,
+      identity: env.identity,
+      permissions: env.permissions,
+      tokenManager: env.tokenManager,
+    },
+    pluginIdProvider,
+  );
+}
+/* highlight-add-end */
+```
+
+Secondly, in your backend router (typically `packages/backend/src/index.ts`) add a route for `/permission` specifying the list of plugin id's that support permissions:
+
+```ts
+// ...
+/* highlight-add-next-line */
+import permission from './plugins/permissions';
+
+async function main() {
+  // ...
+  /* highlight-add-next-line */
+  const permissionEnv = useHotMemoize(module, () => createEnv('permission'));
+
+  // ...
+  /* highlight-add-start */
+  apiRouter.use(
+    '/permission',
+    await permission(permissionEnv, {
+      // return list static plugin which supports Backstage permissions.
+      getPluginIds: () => ['catalog', 'scaffolder', 'permission'],
+    }),
+  );
+  /* highlight-add-end */
+}
+```
 
 ### Configure policy admins
 
-The RBAC plugin empowers you to manage permission policies for users and groups with a designated group of individuals known as policy administrators. These administrators are granted access to the RBAC plugin's REST API and user interface.
+The RBAC plugin empowers you to manage permission policies for users and groups with a designated group of individuals known as policy administrators. These administrators are granted access to the RBAC plugin's REST API and user interface as well as the ability to read from the catalog.
 
 You can specify the policy administrators in your application configuration as follows:
 
@@ -52,6 +109,22 @@ permission:
         - name: group:default/admins
 ```
 
+The RBAC plugin also enables you to grant users the title of 'super user,' which provides them with unrestricted access throughout the Backstage instance.
+
+You can specify the super users in your application configuration as follows:
+
+```YAML
+permission:
+  enabled: true
+  rbac:
+    admin:
+      superUsers:
+        - name: user:default/alice
+        - name: user:default/mike
+```
+
+For more information on the available API endpoints accessible to the policy administrators, refer to the [API documentation](./docs/apis.md).
+
 ### Configuring policies via file
 
 The RBAC plugin also allows you to import policies from an external file. These policies are defined in the [Casbin rules format](https://casbin.org/docs/category/the-basics), known for its simplicity and clarity. For a quick start, please refer to the format details in the provided link.
@@ -60,12 +133,18 @@ Here's an example of an external permission policies configuration file named `r
 
 ```CSV
 p, role:default/team_a, catalog-entity, read, deny
-p, role:default/team_b, catalog.entity.create, use, deny
+p, role:default/team_b, catalog.entity.create, create, deny
 
 g, user:default/bob, role:default/team_a
 
 g, group:default/team_b, role:default/team_b
 ```
+
+---
+
+**NOTE**: When you add a role in the permission policies configuration file, ensure that the role is associated with at least one permission policy with the `allow` effect.
+
+---
 
 You can specify the path to this configuration file in your application configuration:
 
@@ -76,6 +155,18 @@ permission:
     policies-csv-file: /some/path/rbac-policy.csv
 ```
 
+Also, there is an additional configuration value that allows for the reloading of the CSV file without the need to restart.
+
+```YAML
+permission:
+  enabled: true
+  rbac:
+    policies-csv-file: /some/path/rbac-policy.csv
+    policyFileReload: true
+```
+
+For more information on the available permissions within Showcase and RHDH, refer to the [permissions documentation](./docs/permissions.md).
+
 ### Configuring Database Storage for policies
 
 The RBAC plugin offers the option to store policies in a database. It supports two database storage options:
@@ -83,14 +174,17 @@ The RBAC plugin offers the option to store policies in a database. It supports t
 - sqlite3: Suitable for development environments.
 - postgres: Recommended for production environments.
 
-To enable database storage for the RBAC plugin, you should configure it as follows:
+Ensure that you have already configured the database backend for your Backstage instance, as the RBAC plugin utilizes the same database configuration.
+
+### Optional maximum depth
+
+The RBAC plugin also includes an option max depth feature for organizations with potentially complex group hierarchy, this configuration value will ensure that the RBAC plugin will stop at a certain depth when building user graphs.
 
 ```YAML
 permission:
   enabled: true
   rbac:
-    database:
-      enabled: true
+    maxDepth: 1
 ```
 
-Ensure that you have already configured the database backend for your Backstage instance, as the RBAC plugin utilizes the same database configuration.
+The maxDepth must be greater than 0 to ensure that the graphs are built correctly. Also the graph will be built with a hierarchy of 1 + maxDepth.

@@ -109,10 +109,24 @@ export async function startStandaloneServer(
       },
     },
   });
+
   const createEnv = makeCreateEnv(config);
   const catalogEnv = useHotMemoize(module, () => createEnv('catalog'));
+  const discovery = HostDiscovery.fromConfig(config);
+  const tokenManager = ServerTokenManager.fromConfig(config, {
+    logger,
+  });
+  const permissions = ServerPermissionClient.fromConfig(config, {
+    discovery,
+    tokenManager,
+  });
 
-  const ocmRouterOptions: RouterOptions = { logger, config };
+  const ocmRouterOptions: RouterOptions = {
+    logger,
+    config,
+    permissions,
+    discovery,
+  };
   const service = createServiceBuilder(module)
     .setPort(options.port)
     .enableCors({
@@ -122,7 +136,7 @@ export async function startStandaloneServer(
     .addRouter('/catalog', await catalog(catalogEnv));
 
   return await service.start().catch(err => {
-    logger.error(err);
+    logger.error('Dev server failed:', err);
     process.exit(1);
   });
 }

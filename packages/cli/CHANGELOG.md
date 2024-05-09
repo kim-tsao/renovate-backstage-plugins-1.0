@@ -1,3 +1,154 @@
+## @janus-idp/cli [1.8.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.8.4...@janus-idp/cli@1.8.5) (2024-05-02)
+
+
+### Bug Fixes
+
+* **cli:** completely removing the requirement for `app-config` when exporting fronted plugins to dynamic. ([#1603](https://github.com/janus-idp/backstage-plugins/issues/1603)) ([7fb243a](https://github.com/janus-idp/backstage-plugins/commit/7fb243ad5345a241e1c0a848e17f9936cac8234a))
+
+## @janus-idp/cli [1.8.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.8.3...@janus-idp/cli@1.8.4) (2024-05-02)
+
+
+### Bug Fixes
+
+* **cli:** allow retrieving scalprum config from an external file in `export-dynamic-plugin`. ([#1598](https://github.com/janus-idp/backstage-plugins/issues/1598)) ([889be7f](https://github.com/janus-idp/backstage-plugins/commit/889be7f8d22b88d18d180195cdf7bdae53585983))
+
+## @janus-idp/cli [1.8.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.8.2...@janus-idp/cli@1.8.3) (2024-04-30)
+
+
+### Bug Fixes
+
+* **cli:** add `resolve.fallback` for node dependencies in the `export-dynamic-plugin` CLI for frontend plugins. ([#1590](https://github.com/janus-idp/backstage-plugins/issues/1590)) ([e860c3b](https://github.com/janus-idp/backstage-plugins/commit/e860c3bd179961af8bc6e68d5af57c69578badc7))
+* **cli:** allow exporting dynamic plugins from `frontend-plugin-module` packages. ([#1593](https://github.com/janus-idp/backstage-plugins/issues/1593)) ([55508ba](https://github.com/janus-idp/backstage-plugins/commit/55508baff436b41d7c99f119b2adb7047286bd00))
+* **cli:** remove the requirement for `app-config` when exporting fronted plugins to dynamic. ([#1592](https://github.com/janus-idp/backstage-plugins/issues/1592)) ([577efff](https://github.com/janus-idp/backstage-plugins/commit/577efff16b503a5f88126f2c5d26b7c4139e95d0))
+
+## @janus-idp/cli [1.8.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.8.1...@janus-idp/cli@1.8.2) (2024-04-30)
+
+
+### Other changes
+
+* **cli:** new `--in-place`/`--no-in-place` option to the `export-dynamic-plugin` CLI command to allow exporting to `dist-dynamic` (when value is `false`). ([#1584](https://github.com/janus-idp/backstage-plugins/issues/1584)) ([4b5cc40](https://github.com/janus-idp/backstage-plugins/commit/4b5cc403c00fab222bf5d5faa43a30c7fa6a97a4))
+
+## @janus-idp/cli [1.8.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.8.0...@janus-idp/cli@1.8.1) (2024-04-25)
+
+
+### Bug Fixes
+
+* **cli:** fix entrypoint validation when running with `npx` on some packages with `alpha` API. ([#1545](https://github.com/janus-idp/backstage-plugins/issues/1545)) ([3d9781c](https://github.com/janus-idp/backstage-plugins/commit/3d9781cbf48cbd11a576d54afa225b95b2ad5726))
+* **deps:** update dependency bfj to v8 ([#1463](https://github.com/janus-idp/backstage-plugins/issues/1463)) ([01d9360](https://github.com/janus-idp/backstage-plugins/commit/01d9360e08e0d22fd34a6df304eca60cae908a9e))
+
+## @janus-idp/cli [1.8.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.10...@janus-idp/cli@1.8.0) (2024-04-15)
+
+
+### Features
+
+* checkPluginVersion.sh bump plugins for 1.2.0 release ([#1511](https://github.com/janus-idp/backstage-plugins/issues/1511)) ([73c6588](https://github.com/janus-idp/backstage-plugins/commit/73c6588adb7e8c20907b06f2a8ef248cfd4332e4))
+
+## @janus-idp/cli [1.7.10](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.9...@janus-idp/cli@1.7.10) (2024-04-09)
+
+
+### Bug Fixes
+
+* **cli:** `node_modules` of the main plugin unexpectedly copied to the `dist-dynamic` folder. ([#1482](https://github.com/janus-idp/backstage-plugins/issues/1482)) ([deaa19d](https://github.com/janus-idp/backstage-plugins/commit/deaa19d2aaf9e25617911e8bebc67ff8d7471010))
+
+## @janus-idp/cli [1.7.9](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.8...@janus-idp/cli@1.7.9) (2024-04-09)
+
+
+### Bug Fixes
+
+* **cli:** fix entrypoint validation when running with `npx` ([#1473](https://github.com/janus-idp/backstage-plugins/issues/1473)) ([79db649](https://github.com/janus-idp/backstage-plugins/commit/79db649d44a01f8834f5275b17aa1000b7151d59))
+* **cli:** fix the `embed-as-dependencies` option on the `export-dynamic-plugin` CLI... ([#1478](https://github.com/janus-idp/backstage-plugins/issues/1478)) ([edd019e](https://github.com/janus-idp/backstage-plugins/commit/edd019e905fd918ee4dcb4f72f0cdd7f791f6300))
+
+## @janus-idp/cli [1.7.8](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.7...@janus-idp/cli@1.7.8) (2024-04-05)
+
+## @janus-idp/cli [1.7.7](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.6...@janus-idp/cli@1.7.7) (2024-04-02)
+
+
+### Other changes
+
+* experimental `embed-as-dependencies` option for the backend ([#1418](https://github.com/janus-idp/backstage-plugins/issues/1418)) ([b451380](https://github.com/janus-idp/backstage-plugins/commit/b451380bb048086d90bf7a9c34c4d9c056afbb1e))
+
+## @janus-idp/cli [1.7.6](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.5...@janus-idp/cli@1.7.6) (2024-03-29)
+
+## @janus-idp/cli [1.7.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.4...@janus-idp/cli@1.7.5) (2024-03-04)
+
+## @janus-idp/cli [1.7.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.3...@janus-idp/cli@1.7.4) (2024-02-27)
+
+## @janus-idp/cli [1.7.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.2...@janus-idp/cli@1.7.3) (2024-02-26)
+
+## @janus-idp/cli [1.7.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.1...@janus-idp/cli@1.7.2) (2024-02-21)
+
+## @janus-idp/cli [1.7.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.7.0...@janus-idp/cli@1.7.1) (2024-02-05)
+
+
+### Bug Fixes
+
+* **cli:** embedded alpha module dependencies not hoisted. ([#1170](https://github.com/janus-idp/backstage-plugins/issues/1170)) ([063b343](https://github.com/janus-idp/backstage-plugins/commit/063b3437e7a8267a0fb174d454e7cd9411ea790c))
+
+## @janus-idp/cli [1.7.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.6.0...@janus-idp/cli@1.7.0) (2024-01-30)
+
+
+### Features
+
+* add new backend system support for existing backend plugins that have not been migrated over yet ([#1132](https://github.com/janus-idp/backstage-plugins/issues/1132)) ([06e16fd](https://github.com/janus-idp/backstage-plugins/commit/06e16fdcf64257dd08297cb727445d9a8a23c522))
+
+## @janus-idp/cli [1.6.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.5.0...@janus-idp/cli@1.6.0) (2024-01-25)
+
+
+### Features
+
+* **cli:** switch to @janus-idp/cli for new plugins and populate them with the basics ([#782](https://github.com/janus-idp/backstage-plugins/issues/782)) ([bbbefbd](https://github.com/janus-idp/backstage-plugins/commit/bbbefbd7a534844ee35533a62e4b626bd5b8eb4f))
+
+## @janus-idp/cli [1.5.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.7...@janus-idp/cli@1.5.0) (2024-01-16)
+
+
+### Features
+
+* **Notifications:** new notifications FE plugin, API and backend ([#933](https://github.com/janus-idp/backstage-plugins/issues/933)) ([4d4cb78](https://github.com/janus-idp/backstage-plugins/commit/4d4cb781ca9fc331a2c621583e9203f9e4585ee7))
+
+## @janus-idp/cli [1.4.7](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.6...@janus-idp/cli@1.4.7) (2023-12-07)
+
+
+### Bug Fixes
+
+* **cli:** do not change interop mode by default ([#971](https://github.com/janus-idp/backstage-plugins/issues/971)) ([4159977](https://github.com/janus-idp/backstage-plugins/commit/41599773d60fe944e402065970295b47cc2d46d6))
+
+## @janus-idp/cli [1.4.6](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.5...@janus-idp/cli@1.4.6) (2023-11-30)
+
+
+### Bug Fixes
+
+* **cli:** schema generator do not ignore repo root ([#981](https://github.com/janus-idp/backstage-plugins/issues/981)) ([67f22f6](https://github.com/janus-idp/backstage-plugins/commit/67f22f686860e79f5d019f71072b2856a9b17230))
+
+## @janus-idp/cli [1.4.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.4...@janus-idp/cli@1.4.5) (2023-11-22)
+
+
+### Bug Fixes
+
+* make the `export-dynamic-plugin` command more generic for backend plugins. ([#967](https://github.com/janus-idp/backstage-plugins/issues/967)) ([b40c661](https://github.com/janus-idp/backstage-plugins/commit/b40c66174ee4dd3240e034d794b19900c9738c86))
+
+## @janus-idp/cli [1.4.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.3...@janus-idp/cli@1.4.4) (2023-11-20)
+
+
+### Bug Fixes
+
+* **aap+3scale+ocm:** don't log sensitive data from errors ([#945](https://github.com/janus-idp/backstage-plugins/issues/945)) ([7a5e7b8](https://github.com/janus-idp/backstage-plugins/commit/7a5e7b8a57c9841003d9b16e1a65fb62e101fbf1))
+
+## @janus-idp/cli [1.4.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.2...@janus-idp/cli@1.4.3) (2023-11-16)
+
+
+### Bug Fixes
+
+* **cli:** fix possible dependency conflict ([#950](https://github.com/janus-idp/backstage-plugins/issues/950)) ([6c3052e](https://github.com/janus-idp/backstage-plugins/commit/6c3052e9ef2ad77797f6a75cb7f30059442c3764))
+
+## @janus-idp/cli [1.4.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.1...@janus-idp/cli@1.4.2) (2023-11-13)
+
+
+### Bug Fixes
+
+* **cli:** use react v17 in dynamic plugins build ([#931](https://github.com/janus-idp/backstage-plugins/issues/931)) ([b47b10a](https://github.com/janus-idp/backstage-plugins/commit/b47b10ab9a1673bf5b303b3051db71f0921049ed))
+
+## @janus-idp/cli [1.4.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.4.0...@janus-idp/cli@1.4.1) (2023-11-13)
+
 ## @janus-idp/cli [1.4.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/cli@1.3.3...@janus-idp/cli@1.4.0) (2023-11-07)
 
 

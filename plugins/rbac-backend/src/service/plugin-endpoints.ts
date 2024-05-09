@@ -19,8 +19,7 @@ import {
 import { Logger } from 'winston';
 
 import { Policy } from '@janus-idp/backstage-plugin-rbac-common';
-
-import { PluginIdProvider } from './policy-builder';
+import { PluginIdProvider } from '@janus-idp/backstage-plugin-rbac-node';
 
 type PluginMetadataResponse = {
   pluginId: string;
@@ -44,8 +43,8 @@ export class PluginPermissionMetadataCollector {
   constructor(
     private readonly discovery: PluginEndpointDiscovery,
     private readonly pluginIdProvider: PluginIdProvider,
+    private readonly logger: Logger,
     config: Config,
-    logger: Logger,
   ) {
     this.pluginIds = this.pluginIdProvider.getPluginIds();
     this.urlReader = UrlReaders.default({
@@ -55,10 +54,10 @@ export class PluginPermissionMetadataCollector {
     });
   }
 
-  async getPluginConditionRules(): Promise<
-    PluginMetadataResponseSerializedRule[]
-  > {
-    const pluginMetadata = await this.getPluginMetaData();
+  async getPluginConditionRules(
+    token: string | undefined,
+  ): Promise<PluginMetadataResponseSerializedRule[]> {
+    const pluginMetadata = await this.getPluginMetaData(token);
 
     return pluginMetadata
       .filter(metadata => metadata.metaDataResponse.rules.length > 0)
@@ -70,8 +69,10 @@ export class PluginPermissionMetadataCollector {
       });
   }
 
-  async getPluginPolicies(): Promise<PluginPermissionMetaData[]> {
-    const pluginMetadata = await this.getPluginMetaData();
+  async getPluginPolicies(
+    token: string | undefined,
+  ): Promise<PluginPermissionMetaData[]> {
+    const pluginMetadata = await this.getPluginMetaData(token);
 
     return pluginMetadata
       .filter(metadata => metadata.metaDataResponse.permissions !== undefined)
@@ -89,43 +90,74 @@ export class PluginPermissionMetadataCollector {
     return [{ reader: new FetchUrlReader(), predicate: (_url: URL) => true }];
   };
 
-  private async getPluginMetaData(): Promise<PluginMetadataResponse[]> {
+  private async getPluginMetaData(
+    token: string | undefined,
+  ): Promise<PluginMetadataResponse[]> {
     let pluginResponses: PluginMetadataResponse[] = [];
 
     for (const pluginId of this.pluginIds) {
-      const baseEndpoint = await this.discovery.getBaseUrl(pluginId);
-      const wellKnownURL = `${baseEndpoint}/.well-known/backstage/permissions/metadata`;
-      try {
-        const permResp = await this.urlReader.readUrl(wellKnownURL);
-        const permMetaDataRaw = (await permResp.buffer()).toString();
-        const permMetaData = JSON.parse(permMetaDataRaw);
-        if (permMetaData) {
-          pluginResponses = [
-            ...pluginResponses,
-            {
-              metaDataResponse: permMetaData,
-              pluginId,
-            },
-          ];
-        }
-      } catch (err) {
-        if (!isError(err) || err.name !== 'NotFoundError') {
-          throw err;
-        }
+      const permMetaData = await this.getMetadataByPluginId(pluginId, token);
+      if (permMetaData) {
+        pluginResponses = [
+          ...pluginResponses,
+          {
+            metaDataResponse: permMetaData,
+            pluginId,
+          },
+        ];
       }
     }
+
     return pluginResponses;
+  }
+
+  async getMetadataByPluginId(
+    pluginId: string,
+    token: string | undefined,
+  ): Promise<MetadataResponse | undefined> {
+    let permMetaData: MetadataResponse | undefined;
+    try {
+      const baseEndpoint = await this.discovery.getBaseUrl(pluginId);
+      const wellKnownURL = `${baseEndpoint}/.well-known/backstage/permissions/metadata`;
+
+      const permResp = await this.urlReader.readUrl(wellKnownURL, { token });
+      const permMetaDataRaw = (await permResp.buffer()).toString();
+
+      try {
+        permMetaData = JSON.parse(permMetaDataRaw);
+      } catch (err) {
+        // workaround for https://issues.redhat.com/browse/RHIDP-1456
+        return undefined;
+      }
+    } catch (err) {
+      if (isError(err) && err.name === 'NotFoundError') {
+        return undefined;
+      }
+      this.logger.error(
+        `Failed to retrieve permission metadata for ${pluginId}. ${err}`,
+      );
+    }
+    return permMetaData;
   }
 }
 
 function permissionsToCasbinPolicies(permissions: Permission[]): Policy[] {
-  return permissions.map(permission => {
-    const policy: Policy = {
-      permission: isResourcePermission(permission)
-        ? permission.resourceType
-        : permission.name,
-      policy: permission.attributes.action || 'use',
-    };
-    return policy;
-  });
+  const policies: Policy[] = [];
+  for (const permission of permissions) {
+    if (isResourcePermission(permission)) {
+      policies.push({
+        permission: permission.resourceType,
+        policy: permission.attributes.action || 'use',
+        isResourced: true,
+      });
+    } else {
+      policies.push({
+        permission: permission.name,
+        policy: permission.attributes.action || 'use',
+        isResourced: false,
+      });
+    }
+  }
+
+  return policies;
 }

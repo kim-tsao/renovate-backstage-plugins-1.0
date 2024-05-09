@@ -16,7 +16,7 @@
 
 import { assertError } from '@backstage/errors';
 
-import { Command } from 'commander';
+import { Command, InvalidArgumentError } from 'commander';
 
 import { exitWithError } from '../lib/errors';
 
@@ -88,8 +88,26 @@ export function registerScriptCommand(program: Command) {
       'Optional list of packages that should be considered shared by all dynamic plugins, and will be moved to peer dependencies of the dynamic plugin. The `@backstage` packages are by default considered shared dependencies.',
     )
     .option(
+      '--override-interop <mode:package-name,package-name...>',
+      'Optional list of packages for which the CommonJS Rollup output interop mode should be overridden to `mode` when building the dynamic plugin assets (backend plugin only).',
+      (value, previous) => {
+        const [key, val] = value.split(':');
+        if (!['auto', 'esModule', 'default', 'defaultOnly'].includes(key)) {
+          throw new InvalidArgumentError(
+            `Invalid interop mode '${key}'. Possible values are: auto, esModule, default, defaultOnly (see https://rollupjs.org/configuration-options/#output-interop).`,
+          );
+        }
+        return { ...previous, [key]: val?.split(',') || [] };
+      },
+      {},
+    )
+    .option(
       '--no-install',
       'Do not run `yarn install` to fill the dynamic plugin `node_modules` folder (backend plugin only).',
+    )
+    .option(
+      '--no-build',
+      'Do not run `yarn build` on the main and embedded packages before exporting (backend plugin only).',
     )
     .option(
       '--clean',
@@ -97,7 +115,27 @@ export function registerScriptCommand(program: Command) {
     )
     .option(
       '--dev',
-      'Allow testing/debugging a backend plugin dynamic loading locally. This installs the dynamic plugin content (symlink) into the dynamic plugins root folder configured in the app config. This also creates a link from the dynamic plugin content to the plugin package `src` folder, to enable the use of source maps (backend plugin only).',
+      'Allow testing/debugging a dynamic plugin locally. This creates a link from the dynamic plugin content to the plugin package `src` folder, to enable the use of source maps (backend plugin only). This also installs the dynamic plugin content (symlink) into the dynamic plugins root folder configured in the app config (or copies the plugin content to the location explicitely provided by the `--dynamic-plugins-root` argument).',
+    )
+    .option(
+      '--dynamic-plugins-root <dynamic-plugins-root>',
+      'Provides the dynamic plugins root folder when the dynamic plugins content should be copied when using the `--dev` argument.',
+    )
+    .option(
+      '--embed-as-dependencies',
+      'Include embedded packages as private dependencies of backend plugins, instead of merging them with the generated code. Experimental for now, but expected to become the default.',
+      false,
+    )
+    .option('--no-embed-as-dependencies', undefined, true)
+    .option(
+      '--in-place',
+      'Adds the frontend dynamic plugin assets to the `dist-scalprum` folder of the original plugin package. When value is `false` (using `--no-in-place`), it produces the assets in a distinct package located in the `dist-dynamic` sub-folder, as for backend plugins. `true` by default for now, it is expected to become `false` by default.',
+      true,
+    )
+    .option('--no-in-place', undefined, false)
+    .option(
+      '--scalprum-config <file>',
+      'Allows retrieving scalprum configuration from an external JSON file, instead of using a `scalprum` field of the `package.json`. Frontend plugins only.',
     )
     .action(lazy(() => import('./export-dynamic-plugin').then(m => m.command)));
 
@@ -124,7 +162,6 @@ export function registerCommands(program: Command) {
       (opt, arr: string[]) => [...arr, opt],
       [],
     )
-    .option('--scope <scope>', 'The scope to use for new packages')
     .option(
       '--npm-registry <URL>',
       'The package registry to use for new packages',
@@ -134,6 +171,10 @@ export function registerCommands(program: Command) {
       'The version to use for any new packages (default: 0.1.0)',
     )
     .option('--no-private', 'Do not mark new packages as private')
+    .option(
+      '--do-not-edit-packages',
+      'Do not edit packages/app and packages/backend',
+    )
     .action(lazy(() => import('./new/new').then(m => m.default)));
 
   registerScriptCommand(program);

@@ -1,191 +1,150 @@
-import moment from 'moment';
+import { ConfigReader } from '@backstage/config';
 
-import { config } from '@janus-idp/backstage-plugin-kiali-common';
-
+import { readKialiConfigs } from '../service/config';
 import {
-  AUTH_KIALI_TOKEN,
+  AuthStrategy,
   KialiAuthentication,
   MILLISECONDS,
-  Session,
-} from './auth';
+  timeOutforWarningUser,
+} from './Auth';
 
-const kialiURL = 'https://localhost:4000';
-const tomorrow = moment().add(1, 'days');
-const yesterday = moment().subtract(1, 'days');
-
-describe('createRouter', () => {
-  describe('KialiAuthentication constructor', () => {
-    it('returns values for KialiAuthentication', () => {
-      const kialiAuth = new KialiAuthentication({
-        url: kialiURL,
-        strategy: 'anonymous',
-        skipTLSVerify: true,
-      });
-
-      expect(kialiAuth.getSession()).toEqual({
-        expiresOn: '',
-        username: 'anonymous',
-      });
-      expect(kialiAuth.getCookie()).toEqual('');
-      // eslint-disable-next-line
-      expect(kialiAuth['sessionSeconds']).toEqual(
-        config.session.timeOutforWarningUser,
-      );
-    });
-
-    it('with a specific sessionTime', () => {
-      const sessionSeconds = 500;
-      const kialiAuth = new KialiAuthentication({
-        url: kialiURL,
-        strategy: 'anonymous',
-        skipTLSVerify: true,
+const sessionSeconds = 5000;
+const configuration = new ConfigReader({
+  catalog: {
+    providers: {
+      kiali: {
+        url: 'https://localhost:4000',
         sessionTime: sessionSeconds,
-      });
-      // eslint-disable-next-line
-      expect(kialiAuth['sessionSeconds']).toEqual(500 * MILLISECONDS);
+      },
+    },
+  },
+});
+const rawCookie =
+  'kiali-token-aes=/Wh8L+RdEocdRxrNH8TKOShJHD3daCA6KKVUk+jKvoinR28yXMI7/33DHMPqcoVL/bOYZ5ylmiyg95Cmmwr/LDuICgfUgnp763IHoOyMEmUI4yzvpKZfqDDtksjqWCRbkxoVT94JxBFsidtAg3pCgX8gDcXt22c65AX43hAa9auxpvF3tP22SP9aZjaJ4UOqvQ70TwhE2LT+/RLQszccnV7E9kUE7zTGaY1uAKz0bNWwXY7KQ6f/uOQob3kNZMqDtyURlEHPBNA1L/QbFIGqHcM8JbglQZWII+2iPmPMHAjNKcy2xrFNUOU5CjDex9i51KUuJ1GU6xnesChShpo+tuhchFFzklslr/2egXRaPFBBCg0F6f2E3wdIt7hdc3CfAfCQWVWka9Jp30FoOWlI+pNqa5vRFKqpuGQ+vDyzb/CdTVnotsoIraUmb3rYe7gOrHUh/DQQ+smVKYGtoq2FlJMx0k0Z29dZwyM7QKdIKoWtrgfa71y1ZpQ+9CXh/9Iu71cU+5cNq7CC+joGs2eWouBKHjgGNTeP3ZNOE63GOQ36uHcxbugbCzWheJLi5fvLfu2/VVf6a/KlV4NYRI6/uEERJwRwtwWlI4dFRQP+T9DNUuomS6uxLCm0w/5zSoNXwbyJ10iqDOQ3URDk8okgwHD/kG2c0RWvslmDztz9V6AqUWMUg95hz8BDagycir1w0th98irAFjwVd9q/jA3c6DzqB8fITqv2h0f51MMs4oe0H7b2yrpCGhHSVDC5OYEe1FgFPfRbxdG8Oa//IBlUdnoLJXh4Mz9q4gA/87kp/QukyepeV7JbaoNSvBtHplvjUl1Hs/2siKTvKySiSvW5fS0TF9PE3RNtInE/hwxkMBQj5rG8zlmR3AaMLSx5q5sjA1oBz4WLLaxprO1+J22G2+W7eiblqfb01yB3ItZfBBm78ZGFAkxZiPaLuZl0B0eEbLZS8xXKkQuIeR5gTnkqoB2haskIZsI4+rEpC6GYpYukfPBzeyR+NlJd8TFbPwjuu3yjS75rrbHL7WQtMm4C6vx7Qfj7LPWQXw60RdBV3Y0CuOOS1e2lLhNF+G2lh0jYOmUeZif8IeuvQyWtMkeTBZq2etiCoicupYrVf/urNEfGIqUld1GSgoRZonaFBhRj6//7KElU9dMVfPeKAcOZmBThnsVFkqDFF04sqPkMYkJA/o+ykxO0c4EDm/EBdmV+6LY/kdDsjEY/7XV+xx16eS5e635XWebRe2Qa0cukjY7vYZtJb7c0A0nKytzL+ptvq8ovEtrEMhNck1zOliba/epgLff4RPEqdHi+CVZvvtY01SVLVjycJVAaHLvZy7waRptRpcsAOWLu/RZ4LxBMrLW1lOk83tzFo+Sya2RGH2N6sKw0YbRQmB3qLEtRGWvIYGWMnImR+H9R7rgf/86pa6k4XvdSK0NpFOnsN5/m/jNYH8p6zQ0ZAr9eG8A3bJCEnRp+yyIzOa0L4rLEt6y74sFRK6ROHAZU8UeTz3DRC5tg+JBxlKY8MmF1jTMshcZMSYeFN5VrvJJe1VJdMuCIh68BwQsPrdaEDNTHgjQkNaKAahJrtGtY1koVZhgjsRMZjTpuDL8bBzS1APM3zsun/qvo5XrU2uQvZtFbHQBBIYNZn9h/Oyp6YPvaMRP/5xkEm8nuNGcAD5sFHzDbMVaJcdoqUuwAjvlt0BvGrzfoB+K7r1U+o6O/FS4HfcjuH1FEdPJGIXkIrc4vJ8vm18zlZWdoE/bvNhCGzBR2c9OB5FcXHXa/ie0vu4gCst1Ch+81q+2j/yy6+J7uTQbODP8kGsitGSlE8zmVahjpoUoSpI48A+8PsTFg/MkElM9wENRPHD/yPDnNMxpl7z0rAqKZpXJ8zB2ij+8SgawaydDHJCtOYaJASvM8ag==; Path=/; Expires=Tue, 23 Jan 2024 09:55:59 GMT; HttpOnly; Secure; SameSite=Strict';
+const verifyCookie =
+  'kiali-token-aes=/Wh8L+RdEocdRxrNH8TKOShJHD3daCA6KKVUk+jKvoinR28yXMI7/33DHMPqcoVL/bOYZ5ylmiyg95Cmmwr/LDuICgfUgnp763IHoOyMEmUI4yzvpKZfqDDtksjqWCRbkxoVT94JxBFsidtAg3pCgX8gDcXt22c65AX43hAa9auxpvF3tP22SP9aZjaJ4UOqvQ70TwhE2LT+/RLQszccnV7E9kUE7zTGaY1uAKz0bNWwXY7KQ6f/uOQob3kNZMqDtyURlEHPBNA1L/QbFIGqHcM8JbglQZWII+2iPmPMHAjNKcy2xrFNUOU5CjDex9i51KUuJ1GU6xnesChShpo+tuhchFFzklslr/2egXRaPFBBCg0F6f2E3wdIt7hdc3CfAfCQWVWka9Jp30FoOWlI+pNqa5vRFKqpuGQ+vDyzb/CdTVnotsoIraUmb3rYe7gOrHUh/DQQ+smVKYGtoq2FlJMx0k0Z29dZwyM7QKdIKoWtrgfa71y1ZpQ+9CXh/9Iu71cU+5cNq7CC+joGs2eWouBKHjgGNTeP3ZNOE63GOQ36uHcxbugbCzWheJLi5fvLfu2/VVf6a/KlV4NYRI6/uEERJwRwtwWlI4dFRQP+T9DNUuomS6uxLCm0w/5zSoNXwbyJ10iqDOQ3URDk8okgwHD/kG2c0RWvslmDztz9V6AqUWMUg95hz8BDagycir1w0th98irAFjwVd9q/jA3c6DzqB8fITqv2h0f51MMs4oe0H7b2yrpCGhHSVDC5OYEe1FgFPfRbxdG8Oa//IBlUdnoLJXh4Mz9q4gA/87kp/QukyepeV7JbaoNSvBtHplvjUl1Hs/2siKTvKySiSvW5fS0TF9PE3RNtInE/hwxkMBQj5rG8zlmR3AaMLSx5q5sjA1oBz4WLLaxprO1+J22G2+W7eiblqfb01yB3ItZfBBm78ZGFAkxZiPaLuZl0B0eEbLZS8xXKkQuIeR5gTnkqoB2haskIZsI4+rEpC6GYpYukfPBzeyR+NlJd8TFbPwjuu3yjS75rrbHL7WQtMm4C6vx7Qfj7LPWQXw60RdBV3Y0CuOOS1e2lLhNF+G2lh0jYOmUeZif8IeuvQyWtMkeTBZq2etiCoicupYrVf/urNEfGIqUld1GSgoRZonaFBhRj6//7KElU9dMVfPeKAcOZmBThnsVFkqDFF04sqPkMYkJA/o+ykxO0c4EDm/EBdmV+6LY/kdDsjEY/7XV+xx16eS5e635XWebRe2Qa0cukjY7vYZtJb7c0A0nKytzL+ptvq8ovEtrEMhNck1zOliba/epgLff4RPEqdHi+CVZvvtY01SVLVjycJVAaHLvZy7waRptRpcsAOWLu/RZ4LxBMrLW1lOk83tzFo+Sya2RGH2N6sKw0YbRQmB3qLEtRGWvIYGWMnImR+H9R7rgf/86pa6k4XvdSK0NpFOnsN5/m/jNYH8p6zQ0ZAr9eG8A3bJCEnRp+yyIzOa0L4rLEt6y74sFRK6ROHAZU8UeTz3DRC5tg+JBxlKY8MmF1jTMshcZMSYeFN5VrvJJe1VJdMuCIh68BwQsPrdaEDNTHgjQkNaKAahJrtGtY1koVZhgjsRMZjTpuDL8bBzS1APM3zsun/qvo5XrU2uQvZtFbHQBBIYNZn9h/Oyp6YPvaMRP/5xkEm8nuNGcAD5sFHzDbMVaJcdoqUuwAjvlt0BvGrzfoB+K7r1U+o6O/FS4HfcjuH1FEdPJGIXkIrc4vJ8vm18zlZWdoE/bvNhCGzBR2c9OB5FcXHXa/ie0vu4gCst1Ch+81q+2j/yy6+J7uTQbODP8kGsitGSlE8zmVahjpoUoSpI48A+8PsTFg/MkElM9wENRPHD/yPDnNMxpl7z0rAqKZpXJ8zB2ij+8SgawaydDHJCtOYaJASvM8ag==';
+const kialiDetails = readKialiConfigs(configuration);
+
+describe('Let create Auth', () => {
+  it('should return session anonymous by default, cookie empty and sessionSeconds to configuration after constructor', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    expect(AuthClient.getSession()).toStrictEqual({
+      sessionInfo: { expiresOn: '', username: 'anonymous' },
     });
+    expect(AuthClient.getCookie()).toStrictEqual('');
+    expect(AuthClient.getSecondsSession()).toBe(sessionSeconds * MILLISECONDS);
   });
-  describe('KialiAuthentication set', () => {
-    it('session set', () => {
-      const kialiAuth = new KialiAuthentication({
-        url: kialiURL,
-        strategy: 'anonymous',
-        skipTLSVerify: true,
-      });
-      expect(kialiAuth.getSession()).toEqual({
-        expiresOn: '',
+  it('should return default sessionSeconds if not sessionTime set', async () => {
+    const AuthClient = new KialiAuthentication(
+      readKialiConfigs(
+        new ConfigReader({
+          catalog: {
+            providers: {
+              kiali: {
+                url: 'https://localhost:4000',
+              },
+            },
+          },
+        }),
+      ),
+    );
+    expect(AuthClient.getSecondsSession()).toBe(timeOutforWarningUser);
+  });
+
+  it('Should set kialiCookie correctly', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    AuthClient.setKialiCookie(rawCookie);
+    expect(AuthClient.getCookie()).toBe(verifyCookie);
+    AuthClient.setKialiCookie('');
+    expect(AuthClient.getCookie()).toBe('');
+  });
+
+  it('Not should relogin when strateDate.now = jest.fn(() => new Date("2020-05-13T12:33:37.000Z"));gy is anonymous', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    AuthClient.setAuthInfo({
+      sessionInfo: { expiresOn: '', username: 'anonymous' },
+      strategy: AuthStrategy.anonymous,
+    });
+    expect(AuthClient.shouldRelogin()).toBeFalsy();
+  });
+
+  it('Should relogin if strategy is not anonymous and cookie is not set', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    AuthClient.setAuthInfo({
+      sessionInfo: { expiresOn: '', username: 'anonymous' },
+      strategy: AuthStrategy.token,
+    });
+    AuthClient.setKialiCookie('');
+    expect(AuthClient.shouldRelogin()).toBeTruthy();
+  });
+
+  it('Not should relogin if strategy is not anonymous and not expire', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    Date.now = jest.fn(() => new Date('2024-01-01T00:00:00.000Z').getTime());
+    AuthClient.setAuthInfo({
+      sessionInfo: {
+        expiresOn: '2024-02-01T00:00:00.000Z',
         username: 'anonymous',
-      });
-      const session: Session = {
-        expiresOn: tomorrow.toISOString(),
-        username: 'kiali',
-      };
-      kialiAuth.setSession(session);
-      expect(kialiAuth.getSession()).toEqual(session);
+      },
+      strategy: AuthStrategy.token,
     });
-
-    it('Cookie set', async () => {
-      const kialiAuth = new KialiAuthentication({
-        url: kialiURL,
-        strategy: 'anonymous',
-        skipTLSVerify: true,
-      });
-      expect(kialiAuth.getCookie()).toEqual('');
-
-      const cookieKiali = `${AUTH_KIALI_TOKEN}=kiali-cookie-token`;
-      const cookie = `d5b5278d6ecca213a6cda3f6cfaa8cef=d0f2b7c7d1dd95460bc1764814f35468; ${cookieKiali} ; date=today`;
-      kialiAuth.setKialiCookie(cookie);
-      expect(kialiAuth.getCookie()).toEqual(cookieKiali);
-    });
-
-    it('Cookie set to empty', async () => {
-      const kialiAuth = new KialiAuthentication({
-        url: kialiURL,
-        strategy: 'anonymous',
-        skipTLSVerify: true,
-      });
-      expect(kialiAuth.getCookie()).toEqual('');
-
-      const wrongCookieKiali = `${AUTH_KIALI_TOKEN}error=kiali-cookie-token`;
-      const cookie = `d5b5278d6ecca213a6cda3f6cfaa8cef=d0f2b7c7d1dd95460bc1764814f35468; ${wrongCookieKiali} ; date=today`;
-      kialiAuth.setKialiCookie(cookie);
-      expect(kialiAuth.getCookie()).toEqual('');
-    });
+    AuthClient.setKialiCookie(rawCookie);
+    expect(AuthClient.shouldRelogin()).toBeFalsy();
   });
 
-  describe('Should relogin', () => {
-    it('should be false if strategy is anonymous', () => {
-      const kialiAuth = new KialiAuthentication({
-        url: kialiURL,
-        strategy: 'anonymous',
-        skipTLSVerify: true,
-      });
-      expect(kialiAuth.shouldRelogin()).toBeFalsy();
+  it('Should relogin if strategy is not anonymous and cokkie was expire', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    Date.now = jest.fn(() => new Date('2024-03-01T00:00:00.000Z').getTime());
+    AuthClient.setAuthInfo({
+      sessionInfo: {
+        expiresOn: '2024-02-01T00:00:00.000Z',
+        username: 'anonymous',
+      },
+      strategy: AuthStrategy.token,
     });
+    AuthClient.setKialiCookie(rawCookie);
+    expect(AuthClient.shouldRelogin()).toBeTruthy();
+  });
 
-    it('should be true if strategy is not anonymous and cookie is empty', () => {
-      const kialiAuth = new KialiAuthentication({
-        url: kialiURL,
-        strategy: 'token',
-        skipTLSVerify: true,
-      });
-      expect(kialiAuth.shouldRelogin()).toBeTruthy();
+  it('Should extend session if session expired', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    Date.now = jest.fn(() => new Date('2024-02-01T10:00:00.000Z').getTime());
+    AuthClient.setAuthInfo({
+      sessionInfo: {
+        expiresOn: '2024-02-01T08:00:00.000Z',
+        username: 'anonymous',
+      },
+      strategy: AuthStrategy.token,
     });
+    AuthClient.setKialiCookie(rawCookie);
+    expect(AuthClient.shouldRelogin()).toBeTruthy();
+  });
 
-    describe('Strategy is not anonymous', () => {
-      it('should check the expire time if cookie is set but expire date is out', () => {
-        const kialiAuth = new KialiAuthentication({
-          url: kialiURL,
-          strategy: 'token',
-          skipTLSVerify: true,
-        });
-        const cookieKiali = `${AUTH_KIALI_TOKEN}=kiali-cookie-token`;
-        const cookie = `d5b5278d6ecca213a6cda3f6cfaa8cef=d0f2b7c7d1dd95460bc1764814f35468; ${cookieKiali} ; date=today`;
-        kialiAuth.setKialiCookie(cookie);
-        const session: Session = {
-          expiresOn: yesterday.toISOString(),
-          username: 'kiali',
-        };
-        kialiAuth.setSession(session);
-        expect(kialiAuth.shouldRelogin()).toBeTruthy();
-      });
-
-      it('should check the expire time if cookie is set and expire date is fine', () => {
-        const kialiAuth = new KialiAuthentication({
-          url: kialiURL,
-          strategy: 'token',
-          skipTLSVerify: true,
-        });
-        const cookieKiali = `${AUTH_KIALI_TOKEN}=kiali-cookie-token`;
-        const cookie = `d5b5278d6ecca213a6cda3f6cfaa8cef=d0f2b7c7d1dd95460bc1764814f35468; ${cookieKiali} ; date=today`;
-        kialiAuth.setKialiCookie(cookie);
-        const session: Session = {
-          expiresOn: tomorrow.toISOString(),
-          username: 'kiali',
-        };
-        kialiAuth.setSession(session);
-        expect(kialiAuth.getSession()).toBe(session);
-        expect(kialiAuth.shouldRelogin()).toBeFalsy();
-      });
-
-      it('should check if we need extend session', () => {
-        const kialiAuth = new KialiAuthentication({
-          url: kialiURL,
-          strategy: 'token',
-          skipTLSVerify: true,
-          sessionTime: 60 * 60, // 1 hour of session
-        });
-        const cookieKiali = `${AUTH_KIALI_TOKEN}=kiali-cookie-token`;
-        const cookie = `d5b5278d6ecca213a6cda3f6cfaa8cef=d0f2b7c7d1dd95460bc1764814f35468; ${cookieKiali} ; date=today`;
-        kialiAuth.setKialiCookie(cookie);
-        let session: Session = {
-          expiresOn: tomorrow.toISOString(),
-          username: 'kiali',
-        };
-        kialiAuth.setSession(session);
-        expect(kialiAuth.checkIfExtendSession()).toBeFalsy();
-        session = { expiresOn: yesterday.toISOString(), username: 'kiali' };
-        kialiAuth.setSession(session);
-        expect(kialiAuth.checkIfExtendSession()).toBeTruthy();
-
-        // Check with sessionTime less than option
-        const today_less_sessiontime = moment().add(50, 'minutes');
-        session = {
-          expiresOn: today_less_sessiontime.toISOString(),
-          username: 'kiali',
-        };
-        kialiAuth.setSession(session);
-        expect(kialiAuth.checkIfExtendSession()).toBeTruthy();
-
-        // Check with sessionTime less than option
-        const today_more_sessiontime = moment().add(70, 'minutes');
-        session = {
-          expiresOn: today_more_sessiontime.toISOString(),
-          username: 'kiali',
-        };
-        kialiAuth.setSession(session);
-        expect(kialiAuth.checkIfExtendSession()).toBeFalsy();
-      });
+  it('Should extend session if timeLeft is lower than sessionSeconds', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    Date.now = jest.fn(() => new Date('2024-02-01T10:00:00.000Z').getTime());
+    AuthClient.setAuthInfo({
+      sessionInfo: {
+        expiresOn: '2024-02-01T11:00:00.000Z',
+        username: 'anonymous',
+      },
+      strategy: AuthStrategy.token,
     });
+    AuthClient.setKialiCookie(rawCookie);
+    expect(AuthClient.shouldRelogin()).toBeTruthy();
+  });
+
+  it('Should not extend session if timeLeft is greater than sessionSeconds', async () => {
+    const AuthClient = new KialiAuthentication(kialiDetails);
+    Date.now = jest.fn(() => new Date('2024-02-01T10:00:00.000Z').getTime());
+    AuthClient.setAuthInfo({
+      sessionInfo: {
+        expiresOn: '2024-02-01T12:00:00.000Z',
+        username: 'anonymous',
+      },
+      strategy: AuthStrategy.token,
+    });
+    AuthClient.setKialiCookie(rawCookie);
+    expect(AuthClient.shouldRelogin()).toBeFalsy();
   });
 });

@@ -1,3 +1,5 @@
+import { ComputedStatus } from '@janus-idp/shared-react';
+
 export const tektonGroupColor = '#38812f';
 
 export type GroupVersionKind = {
@@ -27,10 +29,23 @@ export type TektonResourcesContextData = {
   clusters: string[];
   selectedCluster?: number;
   setSelectedCluster: React.Dispatch<React.SetStateAction<number>>;
-  selectedStatus: string;
-  setSelectedStatus: React.Dispatch<React.SetStateAction<string>>;
+  selectedStatus: ComputedStatus;
+  setSelectedStatus: React.Dispatch<React.SetStateAction<ComputedStatus>>;
   isExpanded?: boolean;
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export type Order = 'asc' | 'desc';
+
+export type OpenRowStatus = {
+  [x: string]: boolean;
+};
+
+export type PipelineRunScanResults = {
+  vulnerabilities?: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+};
