@@ -144,7 +144,7 @@
       ],
       "additionalBranchPrefix": "orchestrator -",
       "addLabels": [
-        "team:orchestrator"
+        "team/orchestrator"
       ],
       "matchPackagePatterns": [
         ".*"
@@ -156,7 +156,7 @@
       ],
       "additionalBranchPrefix": "notifications -",
       "addLabels": [
-        "team:notifications"
+        "team/notifications"
       ],
       "matchPackagePatterns": [
         ".*"
@@ -168,7 +168,7 @@
       ],
       "additionalBranchPrefix": "kiali -",
       "addLabels": [
-        "team:kiali"
+        "team/kiali"
       ],
       "matchPackagePatterns": [
         ".*"
@@ -180,7 +180,7 @@
       ],
       "additionalBranchPrefix": "devex -",
       "addLabels": [
-        "team:devex"
+        "team/devex"
       ],
       "matchPackagePatterns": [
         ".*"
@@ -193,7 +193,7 @@
       ],
       "additionalBranchPrefix": "rhtap -",
       "addLabels": [
-        "team:rhtap"
+        "team/rhtap"
       ],
       "matchPackagePatterns": [
         ".*"
@@ -215,7 +215,7 @@
         ".*"
       ],
       "addLabels": [
-        "team:rhdh"
+        "team/rhdh"
       ]
     },
     {
@@ -236,7 +236,7 @@
         ".*"
       ],
       "addLabels": [
-        "team:community"
+        "team/community"
       ]
     }
   ],
