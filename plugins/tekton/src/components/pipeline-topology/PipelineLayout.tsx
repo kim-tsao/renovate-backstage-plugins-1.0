@@ -1,5 +1,4 @@
 import React from 'react';
-import Measure from 'react-measure';
 
 import {
   action,
@@ -43,7 +42,6 @@ type PipelineLayoutProps = {
 
 export const PipelineLayout = ({ model }: PipelineLayoutProps) => {
   const [vis, setVis] = React.useState<Controller | null>(null);
-  const [width, setWidth] = React.useState<number>(0);
   const [maxSize, setMaxSize] = React.useState<{
     height: number;
     width: number;
@@ -53,7 +51,7 @@ export const PipelineLayout = ({ model }: PipelineLayoutProps) => {
   const layout: PipelineLayoutTypes = model.graph.layout as PipelineLayoutTypes;
 
   const onLayoutUpdate = React.useCallback(
-    nodes => {
+    (nodes: Node[]) => {
       const nodeBounds = nodes.map((node: Node<NodeModel, any>) =>
         node.getBounds(),
       );
@@ -67,7 +65,9 @@ export const PipelineLayout = ({ model }: PipelineLayoutProps) => {
           .map((bounds: Rect) => bounds.height)
           .reduce((h1: number, h2: number) => Math.max(h1, h2), 0),
       );
-      const maxObject = nodeBounds.find((nb: Rect) => nb.height === maxHeight);
+      const maxObject =
+        nodeBounds.find((nb: Rect) => nb.height === maxHeight) ??
+        ({ y: 0 } as Rect);
 
       const maxX = Math.floor(
         nodeBounds
@@ -173,28 +173,16 @@ export const PipelineLayout = ({ model }: PipelineLayoutProps) => {
   );
 
   return (
-    <Measure
-      bounds
-      onResize={contentRect => {
-        setWidth(contentRect.bounds?.width ?? 0);
+    <div
+      style={{
+        height: Math.min(window.innerHeight, maxSize?.height),
       }}
     >
-      {({ measureRef }) => (
-        <div ref={measureRef}>
-          <div
-            style={{
-              height: Math.min(window.innerHeight, maxSize?.height),
-              width: Math.min(width, maxSize?.width),
-            }}
-          >
-            <VisualizationProvider controller={vis}>
-              <TopologyView controlBar={controlBar(vis)}>
-                <VisualizationSurface />
-              </TopologyView>
-            </VisualizationProvider>
-          </div>
-        </div>
-      )}
-    </Measure>
+      <VisualizationProvider controller={vis}>
+        <TopologyView controlBar={controlBar(vis)}>
+          <VisualizationSurface />
+        </TopologyView>
+      </VisualizationProvider>
+    </div>
   );
 };

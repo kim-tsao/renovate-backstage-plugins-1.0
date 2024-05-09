@@ -1,5 +1,4 @@
-import { createServiceBuilder, HostDiscovery } from '@backstage/backend-common';
-import { CatalogClient } from '@backstage/catalog-client';
+import { createServiceBuilder } from '@backstage/backend-common';
 import { ConfigReader } from '@backstage/config';
 
 import { Logger } from 'winston';
@@ -19,14 +18,10 @@ export async function startStandaloneServer(
 ): Promise<Server> {
   const logger = options.logger.child({ service: 'kiali-backend' });
   const config = new ConfigReader({});
-  const catalogApi = new CatalogClient({
-    discoveryApi: HostDiscovery.fromConfig(config),
-  });
   logger.debug('Starting application server...');
   const router = await createRouter({
     logger,
     config,
-    catalogApi,
   });
 
   let service = createServiceBuilder(module)
@@ -37,7 +32,7 @@ export async function startStandaloneServer(
   }
 
   return await service.start().catch(err => {
-    logger.error(err);
+    logger.error('Standalone server failed:', err);
     process.exit(1);
   });
 }

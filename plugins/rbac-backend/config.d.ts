@@ -1,8 +1,14 @@
 export interface Config {
   permission: {
     rbac: {
+      'policies-csv-file'?: string;
       /**
-       * Optional configuration for admins, can declare individual users and / or groups
+       * Allow for reloading of the CSV file.
+       * @visibility frontend
+       */
+      policyFileReload?: boolean;
+      /**
+       * Optional configuration for admins
        * @visibility frontend
        */
       admin?: {
@@ -16,19 +22,17 @@ export interface Config {
            */
           name: string;
         }>;
-      };
-      /**
-       * Optional configuration for database
-       * @visibility frontend
-       */
-      database?: {
         /**
-         * Whether or not a database will be used
+         * The list of super users that will have allow all access, should be a list of only users
          * @visibility frontend
          */
-        enabled: boolean;
+        superUsers?: Array<{
+          /**
+           * @visibility frontend
+           */
+          name: string;
+        }>;
       };
-
       /**
        * An optional list of plugin IDs.
        * The RBAC plugin will handle access control for plugins included in this list.

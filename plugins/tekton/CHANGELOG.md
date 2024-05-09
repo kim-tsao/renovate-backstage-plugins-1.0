@@ -1,3 +1,232 @@
+## @janus-idp/backstage-plugin-tekton [3.5.7](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.5.6...@janus-idp/backstage-plugin-tekton@3.5.7) (2024-02-21)
+
+
+### Other changes
+
+* **tekton:** add playwright tests for the plugin ([#1228](https://github.com/janus-idp/backstage-plugins/issues/1228)) ([705afc2](https://github.com/janus-idp/backstage-plugins/commit/705afc2892839f39a8cbad39f51c959aa3ac4c8a))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.5.2
+* **@janus-idp/cli:** upgraded to 1.7.2
+
+## @janus-idp/backstage-plugin-tekton [3.5.6](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.5.5...@janus-idp/backstage-plugin-tekton@3.5.6) (2024-02-16)
+
+
+### Bug Fixes
+
+* **tekton:** upgrade to use latest @aonic-ui/pipelines package ([#1212](https://github.com/janus-idp/backstage-plugins/issues/1212)) ([0ae37f7](https://github.com/janus-idp/backstage-plugins/commit/0ae37f7a6c56df374e0e4e326397617ccd46aca8))
+
+## @janus-idp/backstage-plugin-tekton [3.5.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.5.4...@janus-idp/backstage-plugin-tekton@3.5.5) (2024-02-07)
+
+
+### Bug Fixes
+
+* **topology/tekton:** stop polling after log streaming completes ([#1122](https://github.com/janus-idp/backstage-plugins/issues/1122)) ([191bac2](https://github.com/janus-idp/backstage-plugins/commit/191bac2d21259b4fdc42193c6cf436987968eb88))
+
+## @janus-idp/backstage-plugin-tekton [3.5.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.5.3...@janus-idp/backstage-plugin-tekton@3.5.4) (2024-02-05)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.7.1
+
+## @janus-idp/backstage-plugin-tekton [3.5.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.5.2...@janus-idp/backstage-plugin-tekton@3.5.3) (2024-02-02)
+
+
+### Bug Fixes
+
+* **tekton:** external sbom view action should not open logs modal ([#1152](https://github.com/janus-idp/backstage-plugins/issues/1152)) ([714ac5d](https://github.com/janus-idp/backstage-plugins/commit/714ac5d10a5b878232dc1468ebfa03a7a52aa656))
+* **tekton:** fix [#947](https://github.com/janus-idp/backstage-plugins/issues/947): Reset pagination when changing any filter ([#1140](https://github.com/janus-idp/backstage-plugins/issues/1140)) ([5a1a2f4](https://github.com/janus-idp/backstage-plugins/commit/5a1a2f442e2c5957bd725e57066448e5b67d8807))
+
+
+### Documentation
+
+* **tekton:** add tekton plugin documentation to enable UI elements ([#1148](https://github.com/janus-idp/backstage-plugins/issues/1148)) ([91742e8](https://github.com/janus-idp/backstage-plugins/commit/91742e8c524a8b4f87fe9a6cb0d1f5006661b4d2))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.5.1
+
+## @janus-idp/backstage-plugin-tekton [3.5.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.5.1...@janus-idp/backstage-plugin-tekton@3.5.2) (2024-01-31)
+
+
+### Bug Fixes
+
+* **tekton:** fix [#922](https://github.com/janus-idp/backstage-plugins/issues/922) and [#962](https://github.com/janus-idp/backstage-plugins/issues/962) by using full width for pipeline visualization ([#1145](https://github.com/janus-idp/backstage-plugins/issues/1145)) ([1ea9f01](https://github.com/janus-idp/backstage-plugins/commit/1ea9f01c3487035f8495bb98fce30c6c34396510))
+
+## @janus-idp/backstage-plugin-tekton [3.5.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.5.0...@janus-idp/backstage-plugin-tekton@3.5.1) (2024-01-30)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.7.0
+
+## @janus-idp/backstage-plugin-tekton [3.5.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.4.2...@janus-idp/backstage-plugin-tekton@3.5.0) (2024-01-30)
+
+
+### Features
+
+* **tekton:** add view output action in pipelinerun list view ([#1128](https://github.com/janus-idp/backstage-plugins/issues/1128)) ([ad50c44](https://github.com/janus-idp/backstage-plugins/commit/ad50c44233332b0f1325cef5a41d82ba79c538fb))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.5.0
+
+## @janus-idp/backstage-plugin-tekton [3.4.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.4.1...@janus-idp/backstage-plugin-tekton@3.4.2) (2024-01-25)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.6.0
+
+## @janus-idp/backstage-plugin-tekton [3.4.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.4.0...@janus-idp/backstage-plugin-tekton@3.4.1) (2024-01-17)
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.4.0
+
+## @janus-idp/backstage-plugin-tekton [3.4.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.3.0...@janus-idp/backstage-plugin-tekton@3.4.0) (2023-12-22)
+
+
+### Features
+
+* **tekton:** add CVE summary and signed badge ([#1028](https://github.com/janus-idp/backstage-plugins/issues/1028)) ([effdef0](https://github.com/janus-idp/backstage-plugins/commit/effdef085deaeea78a819d1bde960f83820ec705))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.3.0
+
+## @janus-idp/backstage-plugin-tekton [3.3.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.2.0...@janus-idp/backstage-plugin-tekton@3.3.0) (2023-12-20)
+
+
+### Features
+
+* **tekton:** add view logs and view sbom actions in the pipelineRun list ([#1003](https://github.com/janus-idp/backstage-plugins/issues/1003)) ([c7eff5f](https://github.com/janus-idp/backstage-plugins/commit/c7eff5f33daef8eaba58df7e987b44f09c7a8ff9))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.2.0
+
+## @janus-idp/backstage-plugin-tekton [3.2.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.14...@janus-idp/backstage-plugin-tekton@3.2.0) (2023-12-14)
+
+
+### Features
+
+* **tekton:** add support for downloading task and pipelinerun logs ([#1014](https://github.com/janus-idp/backstage-plugins/issues/1014)) ([f588292](https://github.com/janus-idp/backstage-plugins/commit/f5882921756a7aa6d5a74d8fdb6bfc52a7c0c209))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.1.0
+
+## @janus-idp/backstage-plugin-tekton [3.1.14](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.13...@janus-idp/backstage-plugin-tekton@3.1.14) (2023-12-07)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.7
+
+## @janus-idp/backstage-plugin-tekton [3.1.13](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.12...@janus-idp/backstage-plugin-tekton@3.1.13) (2023-12-07)
+
+
+### Bug Fixes
+
+* **tekton:** fix expand collapse with sorting of PLR list table ([#980](https://github.com/janus-idp/backstage-plugins/issues/980)) ([d5fc710](https://github.com/janus-idp/backstage-plugins/commit/d5fc710c09e272583e27dbf5beaa3694d18100fe))
+
+## @janus-idp/backstage-plugin-tekton [3.1.12](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.11...@janus-idp/backstage-plugin-tekton@3.1.12) (2023-11-30)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.6
+
+## @janus-idp/backstage-plugin-tekton [3.1.11](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.10...@janus-idp/backstage-plugin-tekton@3.1.11) (2023-11-23)
+
+
+### Bug Fixes
+
+* add config partials for dynamic frontend plugins ([#965](https://github.com/janus-idp/backstage-plugins/issues/965)) ([b01e55e](https://github.com/janus-idp/backstage-plugins/commit/b01e55e877278afc5de8d28a4c687a6989566bdc))
+
+## @janus-idp/backstage-plugin-tekton [3.1.10](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.9...@janus-idp/backstage-plugin-tekton@3.1.10) (2023-11-23)
+
+
+### Bug Fixes
+
+* **tekton:** update tekton version in the documentation ([#958](https://github.com/janus-idp/backstage-plugins/issues/958)) ([51cc924](https://github.com/janus-idp/backstage-plugins/commit/51cc924b1341d04aa75a1713713c8a6700b2c0a3))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.0.1
+
+## @janus-idp/backstage-plugin-tekton [3.1.9](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.8...@janus-idp/backstage-plugin-tekton@3.1.9) (2023-11-22)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.5
+
+## @janus-idp/backstage-plugin-tekton [3.1.8](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.7...@janus-idp/backstage-plugin-tekton@3.1.8) (2023-11-21)
+
+
+### Bug Fixes
+
+* sync versions in dynamic assets and publish derived packages as additional packages ([#963](https://github.com/janus-idp/backstage-plugins/issues/963)) ([7d0a386](https://github.com/janus-idp/backstage-plugins/commit/7d0a38609b4a18b54c75378a150e8b5c3ba8ff43))
+* **tekton:** fix sorting for pipeline run durations ([#952](https://github.com/janus-idp/backstage-plugins/issues/952)) ([dc711dd](https://github.com/janus-idp/backstage-plugins/commit/dc711dd24b267a8ba7671e5380d84179e65f4995))
+
+## @janus-idp/backstage-plugin-tekton [3.1.7](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.6...@janus-idp/backstage-plugin-tekton@3.1.7) (2023-11-20)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.4
+
+## @janus-idp/backstage-plugin-tekton [3.1.6](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.5...@janus-idp/backstage-plugin-tekton@3.1.6) (2023-11-16)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.3
+
+## @janus-idp/backstage-plugin-tekton [3.1.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.4...@janus-idp/backstage-plugin-tekton@3.1.5) (2023-11-13)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.2
+
+## @janus-idp/backstage-plugin-tekton [3.1.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.3...@janus-idp/backstage-plugin-tekton@3.1.4) (2023-11-13)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.4.1
+
 ## @janus-idp/backstage-plugin-tekton [3.1.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-tekton@3.1.2...@janus-idp/backstage-plugin-tekton@3.1.3) (2023-11-07)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "root",
-  "version": "2.0.0",
+  "version": "3.1.3",
   "private": true,
   "engines": {
     "node": "18"
@@ -9,9 +9,11 @@
     "preinstall": "npx only-allow yarn",
     "start:backstage": "turbo run start:backstage",
     "start:plugins": "turbo run start --filter=@janus-idp/*",
+    "start:storybook": "yarn --cwd packages/storybook start",
     "build": "turbo run build",
     "build:backstage": "turbo run build --filter=...{./packages/app} --filter=...{./packages/backend}",
     "build:plugins": "turbo run build --filter=@janus-idp/*",
+    "build:storybook": "yarn --cwd packages/storybook build",
     "tsc": "turbo run tsc",
     "clean": "turbo run clean",
     "test": "turbo run test",
@@ -20,19 +22,24 @@
     "lint-staged": "lint-staged",
     "prettier:check": "prettier --ignore-unknown --check .",
     "prettier:fix": "prettier --ignore-unknown --write .",
-    "new": "backstage-cli new --scope @janus-idp",
+    "new": "janus-cli new --do-not-edit-packages",
     "release": "multi-semantic-release",
     "prepare": "husky install",
-    "versions:bump": "backstage-cli versions:bump && find . -name 'package.json' ! -path '*/node_modules/*' -exec sed -i '' -e '/devDependencies/,/\\}/{ s/\"\\^/\"/; }' {} \\;"
+    "export-dynamic": "turbo run export-dynamic",
+    "versions:bump": "backstage-cli versions:bump && find . -name 'package.json' ! -path '*/node_modules/*' -exec sed -i -e '/devDependencies/,/\\\\}/{ s/\\\"\\\\^/\\\"/; }' {} ; && yarn install && yarn run export-dynamic --no-cache -- -- --clean"
   },
   "workspaces": {
     "packages": [
       "packages/*",
       "plugins/*"
+    ],
+    "nohoist": [
+      "@janus-idp/backstage-plugin-orchestrator",
+      "@janus-idp/backstage-plugin-orchestrator/@kie-tools/**/!(react|react-dom)"
     ]
   },
   "devDependencies": {
-    "@backstage/cli": "0.23.0",
+    "@backstage/cli": "0.25.2",
     "@ianvs/prettier-plugin-sort-imports": "4.1.1",
     "@janus-idp/cli": "*",
     "@semantic-release/changelog": "6.0.3",
@@ -42,17 +49,18 @@
     "@semrel-extra/npm": "1.2.2",
     "@spotify/prettier-config": "15.0.0",
     "conventional-changelog-conventionalcommits": "6.1.0",
-    "husky": "8.0.3",
     "eslint-plugin-jest": "27.4.2",
+    "husky": "8.0.3",
     "lint-staged": "15.0.1",
     "multi-semantic-release": "3.0.2",
     "prettier": "3.0.3",
     "turbo": "1.10.15",
-    "typescript": "5.2.2"
+    "typescript": "5.3.3"
   },
   "resolutions": {
-    "@types/react": "^17.0.68",
-    "@types/react-dom": "^17.0.21"
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "vscode-languageserver-types": "3.17.1"
   },
   "lint-staged": {
     "*": "turbo run prettier:fix --",
@@ -62,7 +70,10 @@
     "testTimeout": 15000
   },
   "release": {
-    "branches": "main",
+    "branches": [
+      "main",
+      "[0-9]+.[0-9]+.x"
+    ],
     "plugins": [
       [
         "@semantic-release/commit-analyzer",
@@ -133,12 +144,28 @@
       ],
       "@semantic-release/changelog",
       "@semrel-extra/npm",
-      "@semantic-release/git",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "CHANGELOG.md",
+            "package.json",
+            "dist-dynamic/package.json",
+            "dist-dynamic/yarn.lock"
+          ]
+        }
+      ],
       [
         "@semantic-release/github",
         {
           "successComment": false,
           "releasedLabels": false
+        }
+      ],
+      [
+        "@semantic-release/exec",
+        {
+          "successCmd": "if [ -d 'dist-dynamic' ]; then echo 'publishing backend derived package ...' && cd dist-dynamic && npm pkg delete scripts && npm publish --registry https://registry.npmjs.org/ --access public ; fi"
         }
       ]
     ]

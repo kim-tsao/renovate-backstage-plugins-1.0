@@ -1,45 +1,80 @@
 import moment from 'moment';
 
-import { config, KialiDetails } from '@janus-idp/backstage-plugin-kiali-common';
-
-export type Session = {
-  expiresOn: string;
-  username: string;
-};
+import { KialiDetails } from '../service/config';
 
 export const MILLISECONDS = 1000;
 export const AUTH_KIALI_TOKEN = 'kiali-token-aes';
+
+export const timeOutforWarningUser = 60 * MILLISECONDS;
+
+export enum AuthStrategy {
+  anonymous = 'anonymous',
+  openshift = 'openshift',
+  token = 'token',
+  openid = 'openid',
+  header = 'header',
+}
+
+export interface SessionInfo {
+  username?: string;
+  expiresOn?: string;
+}
+
+export interface AuthConfig {
+  authorizationEndpoint?: string;
+  logoutEndpoint?: string;
+  logoutRedirect?: string;
+  strategy?: AuthStrategy;
+}
+
+export type AuthInfo = {
+  sessionInfo: SessionInfo;
+} & AuthConfig;
+
 export class KialiAuthentication {
-  protected session: Session;
   protected cookie: string;
-  private KialiDetails: KialiDetails;
-  private readonly sessionSeconds: number;
+  protected auth: AuthInfo;
+  private readonly sessionMilliSeconds: number;
 
   constructor(KD: KialiDetails) {
-    this.KialiDetails = KD;
-    this.sessionSeconds = KD.sessionTime
+    this.sessionMilliSeconds = KD.sessionTime
       ? KD.sessionTime * MILLISECONDS
-      : config.session.timeOutforWarningUser;
-    this.session = { expiresOn: '', username: 'anonymous' };
+      : timeOutforWarningUser;
+    this.auth = {
+      sessionInfo: { expiresOn: '', username: 'anonymous' },
+    };
     this.cookie = '';
   }
 
+  /*
+    Store Auth Information
+  */
+  setAuthInfo = (auth: AuthInfo) => {
+    this.auth = auth;
+  };
+
   getSession = () => {
-    return this.session;
+    return this.auth;
+  };
+
+  getSecondsSession = () => {
+    return this.sessionMilliSeconds;
   };
 
   getCookie = () => {
     return this.cookie;
   };
 
-  setSession = (session: Session) => {
-    this.session = session;
+  /*
+    Store session
+  */
+  setSession = (session: SessionInfo) => {
+    this.auth.sessionInfo = session;
   };
 
-  checkIfExtendSession = () => {
-    return this.timeLeft() < this.sessionSeconds;
-  };
-
+  /*
+    Parse kiali token with key AUTH_KIALI_TOKEN from headers and store
+  */
   setKialiCookie = (rawCookie: string) => {
     if (rawCookie !== '') {
       const kCookie = rawCookie
@@ -51,23 +86,28 @@ export class KialiAuthentication {
     }
   };
 
+  /*
+    Calculate the time feft until the session expires
+  */
   private timeLeft = (): number => {
-    const expiresOn = moment(this.session.expiresOn);
-
+    const expiresOn = moment(this.auth.sessionInfo.expiresOn);
     if (expiresOn <= moment()) {
       return -1;
     }
-
     return expiresOn.diff(moment());
   };
 
+  /*
+    Check if user should relogin due the timeLeft
+  */
   shouldRelogin = (): boolean => {
-    if (this.KialiDetails.strategy === 'anonymous') {
+    if (this.auth.strategy === 'anonymous') {
       return false;
     }
     if (this.cookie === '') {
       return true;
     }
-    return moment(this.session.expiresOn).diff(moment()) <= 0;
+    const timeLeft = this.timeLeft();
+    return timeLeft <= 0 || timeLeft < this.sessionMilliSeconds;
   };
 }

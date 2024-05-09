@@ -16,15 +16,16 @@ The Nexus Repository Manager plugin displays the information about your build ar
 
    ```yaml title="app-config.yaml"
    proxy:
-     '/nexus-repository-manager':
-       target: 'https://<NEXUS_REPOSITORY_MANAGER_URL>'
-       headers:
-         X-Requested-With: 'XMLHttpRequest'
-         # Uncomment the following line to access a private Nexus Repository Manager using a token
-         # Authorization: 'Bearer <YOUR TOKEN>'
-       changeOrigin: true
-       # Change to "false" in case of using self hosted Nexus Repository Manager instance with a self-signed certificate
-       secure: true
+     endpoints:
+       '/nexus-repository-manager':
+         target: 'https://<NEXUS_REPOSITORY_MANAGER_URL>'
+         headers:
+           X-Requested-With: 'XMLHttpRequest'
+           # Uncomment the following line to access a private Nexus Repository Manager using a token
+           # Authorization: 'Bearer <YOUR TOKEN>'
+         changeOrigin: true
+         # Change to "false" in case of using self hosted Nexus Repository Manager instance with a self-signed certificate
+         secure: true
    ```
 
 1. Optional: Change the base URL of Nexus Repository Manager proxy as follows:
@@ -49,8 +50,7 @@ The Nexus Repository Manager plugin displays the information about your build ar
 1. Enable an additional tab on the service entity page in `packages/app/src/components/catalog/EntityPage.tsx`:
 
    ```tsx title="packages/app/src/components/catalog/EntityPage.tsx"
-   /* highlight-add-next-line */
-   import {
+   /* highlight-add-next-line */ import {
      isNexusRepositoryManagerAvailable,
      NexusRepositoryManagerPage,
    } from '@janus-idp/backstage-plugin-nexus-repository-manager';

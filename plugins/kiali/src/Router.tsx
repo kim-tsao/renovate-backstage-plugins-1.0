@@ -2,60 +2,84 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Entity } from '@backstage/catalog-model';
-import { MissingAnnotationEmptyState } from '@backstage/core-components';
+import { Content, Page } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
 
-import { Button } from '@material-ui/core';
-
-import { KUBERNETES_NAMESPACE } from '@janus-idp/backstage-plugin-kiali-common';
-
-import { KialiComponent, KialiNoPath } from './components/KialiComponent';
+import { KialiNoPath } from './pages/Kiali';
+import { KialiHeader } from './pages/Kiali/Header/KialiHeader';
+import { KialiHeaderEntity } from './pages/Kiali/Header/KialiHeaderEntity';
+import { KialiTabs } from './pages/Kiali/Header/KialiTabs';
+import { KialiEntity } from './pages/Kiali/KialiEntity';
+import { KialiNoAnnotation } from './pages/Kiali/KialiNoAnnotation';
+import { OverviewPage } from './pages/Overview/OverviewPage';
+import { WorkloadDetailsPage } from './pages/WorkloadDetails/WorkloadDetailsPage';
+import { WorkloadListPage } from './pages/WorkloadList/WorkloadListPage';
+import {
+  overviewRouteRef,
+  workloadsDetailRouteRef,
+  workloadsRouteRef,
+} from './routes';
+import { KialiProvider } from './store/KialiProvider';
 
 export const KUBERNETES_ANNOTATION = 'backstage.io/kubernetes-id';
-const KUBERNETES_LABEL_SELECTOR_QUERY_ANNOTATION =
+export const KUBERNETES_NAMESPACE = 'backstage.io/kubernetes-namespace';
+export const KUBERNETES_LABEL_SELECTOR_QUERY_ANNOTATION =
   'backstage.io/kubernetes-label-selector';
 
-export const isKubernetesAvailable = (entity: Entity) =>
-  Boolean(entity.metadata.annotations?.[KUBERNETES_ANNOTATION]) ||
-  Boolean(
-    entity.metadata.annotations?.[KUBERNETES_LABEL_SELECTOR_QUERY_ANNOTATION],
-  );
+export const ANNOTATION_SUPPORTED = [KUBERNETES_NAMESPACE];
 
-export const Router = () => {
+const validateAnnotation = (entity: Entity) => {
+  let validated = false;
+  ANNOTATION_SUPPORTED.forEach(key => {
+    if (Boolean(entity.metadata.annotations?.[key])) {
+      validated = true;
+    }
+  });
+  return validated;
+};
+
+/*
+  Router for entity
+*/
+
+export const EmbeddedRouter = () => {
   const { entity } = useEntity();
-  const kubernetesAnnotationValue =
-    entity.metadata.annotations?.[KUBERNETES_ANNOTATION];
 
-  const kubernetesNamespaceValue =
-    entity.metadata.annotations?.[KUBERNETES_NAMESPACE];
-
-  const kubernetesLabelSelectorQueryAnnotationValue =
-    entity.metadata.annotations?.[KUBERNETES_LABEL_SELECTOR_QUERY_ANNOTATION];
-
-  if (
-    kubernetesAnnotationValue ||
-    kubernetesNamespaceValue ||
-    kubernetesLabelSelectorQueryAnnotationValue
-  ) {
-    return (
+  return !validateAnnotation(entity) ? (
+    <KialiNoAnnotation />
+  ) : (
+    <KialiProvider entity={entity}>
+      <KialiHeaderEntity />
       <Routes>
-        <Route path="/" element={<KialiComponent />} />
-        <Route path="/overview" element={<KialiComponent />} />
+        <Route path="/" element={<KialiEntity />} />
         <Route path="*" element={<KialiNoPath />} />
       </Routes>
-    );
-  }
+    </KialiProvider>
+  );
+};
 
+export const Router = () => {
   return (
-    <>
-      <MissingAnnotationEmptyState annotation={KUBERNETES_ANNOTATION} />
-      <h1>
-        Or use a label selector query, which takes precedence over the previous
-        annotation.
-      </h1>
-      <Button variant="contained" color="primary" href="#">
-        Read Kiali Plugin Docs
-      </Button>
-    </>
+    <KialiProvider>
+      <Page themeId="tool">
+        <KialiHeader />
+        <KialiTabs />
+        <Content>
+          <Routes>
+            <Route path="/" element={<OverviewPage />} />
+            <Route path={overviewRouteRef.path} element={<OverviewPage />} />
+            <Route
+              path={workloadsRouteRef.path}
+              element={<WorkloadListPage />}
+            />
+            <Route
+              path={workloadsDetailRouteRef.path}
+              element={<WorkloadDetailsPage />}
+            />
+            <Route path="*" element={<KialiNoPath />} />
+          </Routes>
+        </Content>
+      </Page>
+    </KialiProvider>
   );
 };

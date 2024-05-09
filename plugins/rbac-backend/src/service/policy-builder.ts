@@ -1,7 +1,6 @@
 import {
   DatabaseManager,
   PluginEndpointDiscovery,
-  resolvePackagePath,
   TokenManager,
 } from '@backstage/backend-common';
 import { CatalogClient } from '@backstage/catalog-client';
@@ -10,20 +9,22 @@ import { IdentityApi } from '@backstage/plugin-auth-node';
 import { RouterOptions } from '@backstage/plugin-permission-backend';
 import { PermissionEvaluator } from '@backstage/plugin-permission-common';
 
-import { FileAdapter, newEnforcer, newModelFromString } from 'casbin';
+import { newEnforcer, newModelFromString } from 'casbin';
 import { Router } from 'express';
 import { Logger } from 'winston';
 
+import { PluginIdProvider } from '@janus-idp/backstage-plugin-rbac-node';
+
 import { CasbinDBAdapterFactory } from '../database/casbin-adapter-factory';
 import { DataBaseConditionalStorage } from '../database/conditional-storage';
+import { migrate } from '../database/migration';
+import { DataBasePolicyMetadataStorage } from '../database/policy-metadata-storage';
+import { DataBaseRoleMetadataStorage } from '../database/role-metadata';
+import { BackstageRoleManager } from '../role-manager/role-manager';
+import { EnforcerDelegate } from './enforcer-delegate';
 import { MODEL } from './permission-model';
 import { RBACPermissionPolicy } from './permission-policy';
 import { PolicesServer } from './policies-rest-api';
-import { BackstageRoleManager } from './role-manager';
-
-export interface PluginIdProvider {
-  getPluginIds: () => string[];
-}
 
 export class PolicyBuilder {
   public static async build(
@@ -37,28 +38,14 @@ export class PolicyBuilder {
     },
     pluginIdProvider: PluginIdProvider = { getPluginIds: () => [] },
   ): Promise<Router> {
-    let adapter;
-    const databaseEnabled = env.config.getOptionalBoolean(
-      'permission.rbac.database.enabled',
+    const databaseManager = DatabaseManager.fromConfig(env.config).forPlugin(
+      'permission',
     );
 
-    const databaseManager = await DatabaseManager.fromConfig(
+    const adapter = await new CasbinDBAdapterFactory(
       env.config,
-    ).forPlugin('permission');
-    // Database adapter work
-    if (databaseEnabled) {
-      adapter = await new CasbinDBAdapterFactory(
-        env.config,
-        databaseManager,
-      ).createAdapter();
-    } else {
-      adapter = new FileAdapter(
-        resolvePackagePath(
-          '@janus-idp/backstage-plugin-rbac-backend',
-          './model/rbac-policy.csv',
-        ),
-      );
-    }
+      databaseManager,
+    ).createAdapter();
 
     const enf = await newEnforcer(newModelFromString(MODEL), adapter);
     await enf.loadPolicy();
@@ -74,8 +61,19 @@ export class PolicyBuilder {
     enf.enableAutoBuildRoleLinks(false);
     await enf.buildRoleLinks();
 
-    const conditionStorage =
-      await DataBaseConditionalStorage.create(databaseManager);
+    await migrate(databaseManager);
+    const knex = await databaseManager.getClient();
+
+    const conditionStorage = new DataBaseConditionalStorage(knex);
+
+    const policyMetadataStorage = new DataBasePolicyMetadataStorage(knex);
+    const roleMetadataStorage = new DataBaseRoleMetadataStorage(knex);
+    const enforcerDelegate = new EnforcerDelegate(
+      enf,
+      policyMetadataStorage,
+      roleMetadataStorage,
+      knex,
+    );
 
     const options: RouterOptions = {
       config: env.config,
@@ -86,7 +84,10 @@ export class PolicyBuilder {
         env.logger,
         env.config,
         conditionStorage,
-        enf,
+        enforcerDelegate,
+        roleMetadataStorage,
+        policyMetadataStorage,
+        knex,
       ),
     };
 
@@ -107,12 +108,13 @@ export class PolicyBuilder {
       env.identity,
       env.permissions,
       options,
-      enf,
+      enforcerDelegate,
       env.config,
       env.logger,
       env.discovery,
       conditionStorage,
       pluginIdProvider,
+      roleMetadataStorage,
     );
     return server.serve();
   }

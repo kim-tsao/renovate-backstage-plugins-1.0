@@ -14,7 +14,7 @@ Run the following command to install the action package in your Backstage projec
 yarn workspace backend add @janus-idp/backstage-scaffolder-backend-module-kubernetes
 ```
 
-## Configuration
+### Installing the action on the legacy backend
 
 1. [Register](https://backstage.io/docs/features/software-templates/writing-custom-actions#registering-custom-actions) the Kubenretes actions by modifying the `packages/backend/src/plugins/scaffolder.ts` file from your project with the following changes:
 
@@ -35,24 +35,18 @@ yarn workspace backend add @janus-idp/backstage-scaffolder-backend-module-kubern
    export default async function createPlugin(
      env: PluginEnvironment,
    ): Promise<Router> {
-     const catalogClient = new CatalogClient({
-       discoveryApi: env.discovery,
-     });
-
+     const catalogClient = new CatalogClient({ discoveryApi: env.discovery });
      const integrations = ScmIntegrations.fromConfig(env.config);
-
      const builtInActions = createBuiltinActions({
        integrations,
        catalogClient,
        config: env.config,
        reader: env.reader,
      });
-
      const actions = [
        ...builtInActions,
        createKubernetesNamespaceAction(catalogClient),
      ];
-
      return await createRouter({
        actions,
        logger: env.logger,
@@ -71,19 +65,37 @@ yarn workspace backend add @janus-idp/backstage-scaffolder-backend-module-kubern
    yarn workspace backend add @backstage/integration
    ```
 
-3. Add the Kubernetes actions to your templates, see the [example](./examples/templates/01-kubernetes-template.yaml) file in this repository for complete usage examples
+### Installing the action on the new backend
 
-   ```yaml
-   action: kubernetes:create-namespace
-   id: create-kubernetes-namespace
-   name: Create kubernetes namespace
-   input:
-     namespace: foo
-     clusterRef: bar
-     token: TOKEN
-     skipTLSVerify: false
-     caData: Zm9v
-   ```
+Add the following to your `packages/backend/src/index.ts` file:
+
+```ts title="packages/backend/src/index.ts"
+const backend = createBackend();
+
+// Add the following line
+backend.add(
+  import('@janus-idp/backstage-scaffolder-backend-module-kubernetes/alpha'),
+);
+
+backend.start();
+```
+
+## Configuration
+
+Add the Kubernetes actions to your templates, see the [example](./examples/templates/01-kubernetes-template.yaml) file in this repository for complete usage examples
+
+```yaml
+action: kubernetes:create-namespace
+id: create-kubernetes-namespace
+name: Create kubernetes namespace
+input:
+  namespace: foo
+  clusterRef: bar
+  token: TOKEN
+  skipTLSVerify: false
+  caData: Zm9v
+  labels: app.io/type=ns; app.io/managed-by=org;
+```
 
 ## Usage
 
@@ -91,14 +103,15 @@ yarn workspace backend add @janus-idp/backstage-scaffolder-backend-module-kubern
 
 #### Input
 
-| Parameter Name |  Type   | Required | Description                                         | Example                           |
-| -------------- | :-----: | :------: | --------------------------------------------------- | --------------------------------- |
-| namespace      | string  |   Yes    | Kubernetes namespace name                           | foo                               |
-| clusterRef     | string  |    No    | Cluster resource entity reference from the catalog  | bar                               |
-| url            | string  |    No    | API url of the kubernetes cluster                   | <https://api.foo.redhat.com:6443> |
-| token          | string  |    No    | Kubernetes API bearer token used for authentication |                                   |
-| skipTLSVerify  | boolean |    No    | If true, certificate verification is skipped        | false                             |
-| caData         | string  |    No    | Base64 encoded certificate data                     |                                   |
+| Parameter Name |  Type   | Required | Description                                         | Example                                |
+| -------------- | :-----: | :------: | --------------------------------------------------- | -------------------------------------- |
+| namespace      | string  |   Yes    | Kubernetes namespace name                           | foo                                    |
+| clusterRef     | string  |    No    | Cluster resource entity reference from the catalog  | bar                                    |
+| url            | string  |    No    | API url of the kubernetes cluster                   | <https://api.foo.redhat.com:6443>      |
+| token          | string  |    No    | Kubernetes API bearer token used for authentication |                                        |
+| skipTLSVerify  | boolean |    No    | If true, certificate verification is skipped        | false                                  |
+| caData         | string  |    No    | Base64 encoded certificate data                     |                                        |
+| label          | string  |    No    | Labels that will be applied to the namespace        | app.io/type=ns; app.io/managed-by=org; |
 
 #### Output
 

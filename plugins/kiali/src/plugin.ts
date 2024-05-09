@@ -6,14 +6,17 @@ import {
   identityApiRef,
 } from '@backstage/core-plugin-api';
 
-import { KialiApiClient, kialiApiRef } from './api';
-import { overviewRouteRef, rootRouteRef } from './routes';
+import { overviewRouteRef, rootRouteRef, workloadsRouteRef } from './routes';
+import { KialiApiClient, kialiApiRef } from './services/Api';
+
+import '@patternfly/patternfly/patternfly.css';
 
 export const kialiPlugin = createPlugin({
   id: 'kiali',
   routes: {
     root: rootRouteRef,
     overview: overviewRouteRef,
+    workloads: workloadsRouteRef,
   },
   apis: [
     createApiFactory({
@@ -22,8 +25,7 @@ export const kialiPlugin = createPlugin({
         discoveryApi: discoveryApiRef,
         identityApi: identityApiRef,
       },
-      factory: ({ discoveryApi, identityApi }) =>
-        new KialiApiClient({ discoveryApi, identityApi }),
+      factory: ({ discoveryApi }) => new KialiApiClient(discoveryApi),
     }),
   ],
 });
@@ -31,8 +33,7 @@ export const kialiPlugin = createPlugin({
 export const KialiPage = kialiPlugin.provide(
   createRoutableExtension({
     name: 'KialiPage',
-    component: () =>
-      import('./components/KialiComponent').then(m => m.KialiComponent),
+    component: () => import('./Router').then(m => m.Router),
     mountPoint: rootRouteRef,
   }),
 );
@@ -54,7 +55,7 @@ export const EntityKialiContent: (
 ) => JSX.Element = kialiPlugin.provide(
   createRoutableExtension({
     name: 'EntityKialiContent',
-    component: () => import('./Router').then(m => m.Router),
+    component: () => import('./Router').then(m => m.EmbeddedRouter),
     mountPoint: rootRouteRef,
   }),
 );

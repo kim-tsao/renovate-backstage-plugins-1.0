@@ -203,12 +203,16 @@ export class KeycloakOrgEntityProvider implements EntityProvider {
         username: provider.username,
         password: provider.password,
       };
-    } else {
+    } else if (provider.clientId && provider.clientSecret) {
       credentials = {
         grantType: 'client_credentials',
-        clientId: provider.clientId!,
+        clientId: provider.clientId,
         clientSecret: provider.clientSecret,
       };
+    } else {
+      throw new Error(
+        `username and password or clientId and clientSecret must be provided.`,
+      );
     }
 
     await kcAdminClient.auth(credentials);
@@ -233,7 +237,7 @@ export class KeycloakOrgEntityProvider implements EntityProvider {
     markCommitComplete();
   }
 
-  private schedule(taskRunner: TaskRunner) {
+  schedule(taskRunner: TaskRunner) {
     this.scheduleFn = async () => {
       const id = `${this.getProviderName()}:refresh`;
       await taskRunner.run({
@@ -247,8 +251,16 @@ export class KeycloakOrgEntityProvider implements EntityProvider {
 
           try {
             await this.read({ logger });
-          } catch (error) {
-            logger.error(error);
+          } catch (error: any) {
+            // Ensure that we don't log any sensitive internal data:
+            logger.error('Error while syncing Keycloak users and groups', {
+              // Default Error properties:
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+              // Additional status code if available:
+              status: error.response?.status,
+            });
           }
         },
       });

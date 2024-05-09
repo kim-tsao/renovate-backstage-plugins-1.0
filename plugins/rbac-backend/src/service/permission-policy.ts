@@ -1,9 +1,6 @@
 import { Config } from '@backstage/config';
 import { ConfigApi } from '@backstage/core-plugin-api';
-import {
-  BackstageIdentityResponse,
-  BackstageUserIdentity,
-} from '@backstage/plugin-auth-node';
+import { BackstageIdentityResponse } from '@backstage/plugin-auth-node';
 import {
   AuthorizeResult,
   isResourcePermission,
@@ -14,35 +11,99 @@ import {
   PolicyQuery,
 } from '@backstage/plugin-permission-node';
 
-import { Enforcer, FileAdapter, newEnforcer, newModelFromString } from 'casbin';
+import { Knex } from 'knex';
 import { Logger } from 'winston';
 
 import { ConditionalStorage } from '../database/conditional-storage';
-import { MODEL } from './permission-model';
+import { PolicyMetadataStorage } from '../database/policy-metadata-storage';
+import { RoleMetadataStorage } from '../database/role-metadata';
+import {
+  addPermissionPoliciesFileData,
+  loadFilteredCSV,
+  removedOldPermissionPoliciesFileData,
+} from '../file-permissions/csv';
+import { metadataStringToPolicy, removeTheDifference } from '../helper';
+import { EnforcerDelegate } from './enforcer-delegate';
 import { validateEntityReference } from './policies-validation';
 
-const useAdmins = async (admins: Config[], enf: Enforcer) => {
-  const adminRoleName = 'role:default/rbac_admin';
-  admins.flatMap(async localConfig => {
-    const name = localConfig.getString('name');
-    const adminRole = [name, adminRoleName];
-    if (!(await enf.hasGroupingPolicy(...adminRole))) {
-      await enf.addGroupingPolicy(...adminRole);
-    }
-  });
-  const adminReadPermission = [adminRoleName, 'policy-entity', 'read', 'allow'];
-  if (!(await enf.hasPolicy(...adminReadPermission))) {
-    await enf.addPolicy(...adminReadPermission);
+const adminRoleName = 'role:default/rbac_admin';
+
+const useAdminsFromConfig = async (
+  admins: Config[],
+  enf: EnforcerDelegate,
+  roleMetadataStorage: RoleMetadataStorage,
+  knex: Knex,
+) => {
+  const groupPoliciesToCompare: string[] = [];
+  const addedGroupPolicies = new Map<string, string>();
+
+  for (const admin of admins) {
+    const entityRef = admin.getString('name');
+    validateEntityReference(entityRef);
+
+    addedGroupPolicies.set(entityRef, adminRoleName);
   }
+
+  const adminRoleMeta =
+    await roleMetadataStorage.findRoleMetadata(adminRoleName);
+
+  const trx = await knex.transaction();
+  try {
+    if (!adminRoleMeta) {
+      await roleMetadataStorage.createRoleMetadata(
+        { source: 'configuration', roleEntityRef: adminRoleName },
+        trx,
+      );
+    } else if (adminRoleMeta.source === 'legacy') {
+      await roleMetadataStorage.removeRoleMetadata(adminRoleName, trx);
+      await roleMetadataStorage.createRoleMetadata(
+        { source: 'configuration', roleEntityRef: adminRoleName },
+        trx,
+      );
+    }
+
+    await trx.commit();
+  } catch (error) {
+    await trx.rollback(error);
+    throw error;
+  }
+
+  await enf.addOrUpdateGroupingPolicies(
+    Array.from<string[]>(addedGroupPolicies.entries()),
+    'configuration',
+    false,
+  );
+
+  const configPoliciesMetadata =
+    await enf.getFilteredPolicyMetadata('configuration');
+
+  for (const policyMetadata of configPoliciesMetadata) {
+    if (metadataStringToPolicy(policyMetadata.policy).length === 2) {
+      const stringPolicy = metadataStringToPolicy(policyMetadata.policy);
+      groupPoliciesToCompare.push(stringPolicy.at(0)!);
+    }
+  }
+
+  await removeTheDifference(
+    groupPoliciesToCompare,
+    Array.from<string>(addedGroupPolicies.keys()),
+    'configuration',
+    adminRoleName,
+    enf,
+  );
+};
+
+const setAdminPermissions = async (enf: EnforcerDelegate) => {
+  const adminReadPermission = [adminRoleName, 'policy-entity', 'read', 'allow'];
+  await enf.addOrUpdatePolicy(adminReadPermission, 'configuration', false);
+
   const adminCreatePermission = [
     adminRoleName,
     'policy-entity',
     'create',
     'allow',
   ];
-  if (!(await enf.hasPolicy(...adminCreatePermission))) {
-    await enf.addPolicy(...adminCreatePermission);
-  }
+  await enf.addOrUpdatePolicy(adminCreatePermission, 'configuration', false);
 
   const adminDeletePermission = [
     adminRoleName,
@@ -50,9 +111,7 @@ const useAdmins = async (admins: Config[], enf: Enforcer) => {
     'delete',
     'allow',
   ];
-  if (!(await enf.hasPolicy(...adminDeletePermission))) {
-    await enf.addPolicy(...adminDeletePermission);
-  }
+  await enf.addOrUpdatePolicy(adminDeletePermission, 'configuration', false);
 
   const adminUpdatePermission = [
     adminRoleName,
@@ -60,90 +119,116 @@ const useAdmins = async (admins: Config[], enf: Enforcer) => {
     'update',
     'allow',
   ];
-  if (!(await enf.hasPolicy(...adminUpdatePermission))) {
-    await enf.addPolicy(...adminUpdatePermission);
-  }
-};
+  await enf.addOrUpdatePolicy(adminUpdatePermission, 'configuration', false);
 
-const addPredefinedPoliciesAndGroupPolicies = async (
-  preDefinedPoliciesFile: string,
-  enf: Enforcer,
-) => {
-  const fileEnf = await newEnforcer(
-    newModelFromString(MODEL),
-    new FileAdapter(preDefinedPoliciesFile),
+  // needed for rbac frontend.
+  const adminCatalogReadPermission = [
+    adminRoleName,
+    'catalog-entity',
+    'read',
+    'allow',
+  ];
+  await enf.addOrUpdatePolicy(
+    adminCatalogReadPermission,
+    'configuration',
+    false,
   );
-  const policies = await fileEnf.getPolicy();
-  for (const policy of policies) {
-    const err = validateEntityReference(policy[0]);
-    if (err) {
-      throw new Error(
-        `Failed to validate policy from file ${preDefinedPoliciesFile}. Cause: ${err.message}`,
-      );
-    }
-
-    if (!(await enf.hasPolicy(...policy))) {
-      await enf.addPolicy(...policy);
-    }
-  }
-  const groupPolicies = await fileEnf.getGroupingPolicy();
-  for (const groupPolicy of groupPolicies) {
-    let err = validateEntityReference(groupPolicy[0]);
-    if (err) {
-      throw new Error(
-        `Failed to validate group policy from file ${preDefinedPoliciesFile}. Cause: ${err.message}`,
-      );
-    }
-    err = validateEntityReference(groupPolicy[1]);
-    if (err) {
-      throw new Error(
-        `Failed to validate group policy from file ${preDefinedPoliciesFile}. Cause: ${err.message}`,
-      );
-    }
-    if (!(await enf.hasGroupingPolicy(...groupPolicy))) {
-      await enf.addGroupingPolicy(...groupPolicy);
-    }
-  }
 };
 
 export class RBACPermissionPolicy implements PermissionPolicy {
-  private readonly enforcer: Enforcer;
+  private readonly enforcer: EnforcerDelegate;
   private readonly logger: Logger;
   private readonly conditionStorage: ConditionalStorage;
+  private readonly policyMetadataStorage: PolicyMetadataStorage;
+  private readonly policiesFile?: string;
+  private readonly allowReload?: boolean;
+  private readonly superUserList?: string[];
 
   public static async build(
     logger: Logger,
     configApi: ConfigApi,
     conditionalStorage: ConditionalStorage,
-    enf: Enforcer,
+    enforcerDelegate: EnforcerDelegate,
+    roleMetadataStorage: RoleMetadataStorage,
+    policyMetaDataStorage: PolicyMetadataStorage,
+    knex: Knex,
   ): Promise<RBACPermissionPolicy> {
+    const superUserList: string[] = [];
     const adminUsers = configApi.getOptionalConfigArray(
       'permission.rbac.admin.users',
+    );
+
+    const superUsers = configApi.getOptionalConfigArray(
+      'permission.rbac.admin.superUsers',
     );
 
     const policiesFile = configApi.getOptionalString(
       'permission.rbac.policies-csv-file',
     );
 
+    const allowReload = configApi.getOptionalBoolean(
+      'permission.rbac.policyFileReload',
+    );
+
+    if (superUsers && superUsers.length > 0) {
+      for (const user of superUsers) {
+        const userName = user.getString('name');
+        superUserList.push(userName);
+      }
+    }
+
+    if (adminUsers && adminUsers.length > 0) {
+      await useAdminsFromConfig(
+        adminUsers,
+        enforcerDelegate,
+        roleMetadataStorage,
+        knex,
+      );
+      await setAdminPermissions(enforcerDelegate);
+    } else {
+      logger.warn(
+        'There are no admins configured for the RBAC-backend plugin. The plugin may not work properly.',
+      );
+    }
+
     if (policiesFile) {
-      await addPredefinedPoliciesAndGroupPolicies(policiesFile, enf);
+      await addPermissionPoliciesFileData(
+        policiesFile,
+        enforcerDelegate,
+        roleMetadataStorage,
+        logger,
+      );
+    } else {
+      await removedOldPermissionPoliciesFileData(enforcerDelegate);
     }
 
-    if (adminUsers) {
-      useAdmins(adminUsers, enf);
-    }
-
-    return new RBACPermissionPolicy(enf, logger, conditionalStorage);
+    return new RBACPermissionPolicy(
+      enforcerDelegate,
+      logger,
+      conditionalStorage,
+      policyMetaDataStorage,
+      policiesFile,
+      allowReload,
+      superUserList,
+    );
   }
 
   private constructor(
-    enforcer: Enforcer,
+    enforcer: EnforcerDelegate,
     logger: Logger,
     conditionStorage: ConditionalStorage,
+    policyMetadataStorage: PolicyMetadataStorage,
+    policiesFile?: string,
+    allowReload?: boolean,
+    superUserList?: string[],
   ) {
     this.enforcer = enforcer;
     this.logger = logger;
     this.conditionStorage = conditionStorage;
+    this.policyMetadataStorage = policyMetadataStorage;
+    this.policiesFile = policiesFile;
+    this.allowReload = allowReload;
+    this.superUserList = superUserList;
   }
 
   async handle(
@@ -160,32 +245,49 @@ export class RBACPermissionPolicy implements PermissionPolicy {
       // a more complicated model with multiple policy and request shapes.
       const action = request.permission.attributes.action ?? 'use';
 
+      if (!identityResp?.identity) {
+        return { result: AuthorizeResult.DENY };
+      }
+
+      const userEntityRef = identityResp.identity.userEntityRef;
+      const permissionName = request.permission.name;
+
       if (isResourcePermission(request.permission)) {
-        status = await this.isAuthorized(
-          identityResp?.identity,
-          request.permission.resourceType,
-          action,
-        );
+        const resourceType = request.permission.resourceType;
+        const hasNamedPermission =
+          await this.hasImplicitPermissionSpecifiedByName(
+            userEntityRef,
+            permissionName,
+            action,
+          );
+        // Let's set up higher priority for permission specified by name, than by resource type
+        const obj = hasNamedPermission ? permissionName : resourceType;
+
+        status = await this.isAuthorized(userEntityRef, obj, action);
 
         if (status && identityResp) {
-          const conditionalDecision = await this.conditionStorage.findCondition(
-            request.permission.resourceType,
-          );
+          const conditionalDecision =
+            await this.conditionStorage.findCondition(resourceType);
           if (conditionalDecision) {
+            this.logger.info(
+              `${identityResp?.identity.userEntityRef} executed condition for permission ${request.permission.name}, resource type ${resourceType} and action ${action}`,
+            );
             return conditionalDecision;
           }
         }
       } else {
-        status = await this.isAuthorized(
-          identityResp?.identity,
-          request.permission.name,
-          action,
-        );
+        status = await this.isAuthorized(userEntityRef, permissionName, action);
       }
 
       const result = status ? AuthorizeResult.ALLOW : AuthorizeResult.DENY;
       this.logger.info(
-        `${identityResp?.identity.userEntityRef} is ${result} for permission ${request.permission.name} and action ${action}`,
+        `${userEntityRef} is ${result} for permission '${
+          request.permission.name
+        }'${
+          isResourcePermission(request.permission)
+            ? `, resource type '${request.permission.resourceType}'`
+            : ''
+        } and action ${action}`,
       );
       return Promise.resolve({
         result: result,
@@ -198,17 +300,41 @@ export class RBACPermissionPolicy implements PermissionPolicy {
     }
   }
 
+  private async hasImplicitPermissionSpecifiedByName(
+    userEntityRef: string,
+    permissionName: string,
+    action: string,
+  ): Promise<boolean> {
+    const userPerms =
+      await this.enforcer.getImplicitPermissionsForUser(userEntityRef);
+    for (const perm of userPerms) {
+      if (permissionName === perm[1] && action === perm[2]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private isAuthorized = async (
-    identity: BackstageUserIdentity | undefined,
-    resourceType: string,
+    userIdentity: string,
+    permission: string,
     action: string,
   ): Promise<boolean> => {
-    if (!identity) {
-      return false;
+    if (this.superUserList!.includes(userIdentity)) {
+      return true;
     }
 
-    const entityRef = identity.userEntityRef;
+    const filter: string[] = [userIdentity, permission, action];
+    if (this.policiesFile && this.allowReload) {
+      await loadFilteredCSV(
+        this.policiesFile,
+        this.enforcer,
+        filter,
+        this.logger,
+        this.policyMetadataStorage,
+      );
+    }
 
-    return await this.enforcer.enforce(entityRef, resourceType, action);
+    return await this.enforcer.enforce(userIdentity, permission, action);
   };
 }

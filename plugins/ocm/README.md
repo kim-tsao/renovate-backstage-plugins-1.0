@@ -124,6 +124,22 @@ If you are interested in Resource discovery and do not want any of the front-end
 
      For more information about the configuration, see [Backstage Kubernetes plugin](https://backstage.io/docs/features/kubernetes/configuration#configuring-kubernetes-clusters) documentation.
 
+1. Optional: Configure the default owner for the cluster entities in the catalog for a specific environment. For example, use the following code to set `foo` as the owner for clusters from `env` in the `app-config.yaml` catalog section:
+
+```yaml title="app-config.yaml"
+catalog:
+  providers:
+    ocm:
+      env:
+        # ...
+        # highlight-next-line
+        owner: user:foo
+```
+
+For more information about the default owner configuration, see [upstream string references documentation](https://backstage.io/docs/features/software-catalog/references/#string-references).
+
+##### Installing the OCM backend package into the legacy backend
+
 1. Create a new plugin instance in `packages/backend/src/plugins/ocm.ts` file as follows:
 
    ```ts title="packages/backend/src/plugins/ocm.ts"
@@ -136,31 +152,26 @@ If you are interested in Resource discovery and do not want any of the front-end
    export default async function createPlugin(
      env: PluginEnvironment,
    ): Promise<Router> {
-     return await createRouter({
-       logger: env.logger,
-       config: env.config,
-     });
+     return await createRouter({ logger: env.logger, config: env.config });
    }
    ```
 
 1. Import and plug the new instance into the `packages/backend/src/index.ts` file:
 
    ```ts title="packages/backend/src/index.ts"
-   /* highlight-add-next-line */
-   import ocm from './plugins/ocm';
-
+   /* highlight-add-next-line */ import ocm from './plugins/ocm';
    async function main() {
-     // ...
+     ...
      const createEnv = makeCreateEnv(config);
-     // ...
-     /* highlight-add-next-line */
-     const ocmEnv = useHotMemoize(module, () => createEnv('ocm'));
-     // ...
+     ...
+     /* highlight-add-next-line */ const ocmEnv = useHotMemoize(module, () =>
+       createEnv('ocm'),
+     );
+     ...
      const apiRouter = Router();
-     // ...
-     /* highlight-add-next-line */
-     apiRouter.use('/ocm', await ocm(ocmEnv));
-     // ...
+     ...
+     /* highlight-add-next-line */ apiRouter.use('/ocm', await ocm(ocmEnv)); ...
+   }
    }
    ```
 
@@ -177,31 +188,28 @@ If you are interested in Resource discovery and do not want any of the front-end
              # highlight-add-start
              schedule: # optional; same options as in TaskScheduleDefinition
                # supports cron, ISO duration, "human duration" as used in code
-               frequency: { minutes: 1 }
+               frequency: { minutes: 1 } # Customize with your desired frequency
                # supports ISO duration, "human duration" as used in code
-               timeout: { minutes: 1 }
+               timeout: { minutes: 1 } # Customize with your desired timeout
              # highlight-add-end
      ```
 
      Then use the configured scheduler by adding the following to the `packages/backend/src/plugins/catalog.ts`:
 
      ```ts title="packages/backend/src/plugins/catalog.ts"
-     /* highlight-add-next-line */
-     import { ManagedClusterProvider } from '@janus-idp/backstage-plugin-ocm-backend';
-
+     /* highlight-add-next-line */ import { ManagedClusterProvider } from '@janus-idp/backstage-plugin-ocm-backend';
      export default async function createPlugin(
        env: PluginEnvironment,
      ): Promise<Router> {
        const builder = await CatalogBuilder.create(env);
-       // ...
-       /* highlight-add-start */
-       const ocm = ManagedClusterProvider.fromConfig(env.config, {
-         logger: env.logger,
-         scheduler: env.scheduler,
-       });
-       builder.addEntityProvider(ocm);
-       /* highlight-add-start */
-       // ...
+
+       /*
+       /* highlight-add-start */ const ocm = ManagedClusterProvider.fromConfig(
+         env.config,
+         { logger: env.logger, scheduler: env.scheduler },
+       );
+       builder.addEntityProvider(ocm); /* highlight-add-start */
+     }
      }
      ```
 
@@ -216,25 +224,25 @@ If you are interested in Resource discovery and do not want any of the front-end
    - **Method 2**: Add a schedule directly inside the `packages/backend/src/plugins/catalog.ts` file:
 
      ```ts title="packages/backend/src/plugins/catalog.ts"
-     /* highlight-add-next-line */
-     import { ManagedClusterProvider } from '@janus-idp/backstage-plugin-ocm-backend';
-
+     /* highlight-add-next-line */ import { ManagedClusterProvider } from '@janus-idp/backstage-plugin-ocm-backend';
      export default async function createPlugin(
        env: PluginEnvironment,
      ): Promise<Router> {
        const builder = await CatalogBuilder.create(env);
-       // ...
-       /* highlight-add-start */
-       const ocm = ManagedClusterProvider.fromConfig(env.config, {
-         logger: env.logger,
-         schedule: env.scheduler.createScheduledTaskRunner({
-           frequency: { minutes: 1 },
-           timeout: { minutes: 1 },
-         }),
-       });
-       builder.addEntityProvider(ocm);
-       /* highlight-add-start */
-       // ...
+
+       /*
+       /* highlight-add-start */ const ocm = ManagedClusterProvider.fromConfig(
+         env.config,
+         {
+           logger: env.logger,
+           schedule: env.scheduler.createScheduledTaskRunner({
+             frequency: { minutes: 1 },
+             timeout: { minutes: 1 },
+           }),
+         },
+       );
+       builder.addEntityProvider(ocm); /* highlight-add-start */
+     }
      }
      ```
 
@@ -246,29 +254,44 @@ If you are interested in Resource discovery and do not want any of the front-end
 
    ***
 
-1. Optional: Configure the default owner for the cluster entities in the catalog for a specific environment. For example, use the following code to set `foo` as the owner for clusters from `env` in the `app-config.yaml` catalog section:
-
-   ```yaml title="app-config.yaml"
-   catalog:
-     providers:
-       ocm:
-         env:
-           # ...
-           # highlight-next-line
-           owner: user:foo
-   ```
-
-   For more information about the default owner configuration, see [upstream string references documentation](https://backstage.io/docs/features/software-catalog/references/#string-references).
-
-#### Setting up the OCM backend package using the new backend system
+##### Installing the OCM backend package into the new backend
 
 The OCM plugin supports integration with the [new backend system](https://backstage.io/docs/backend-system/). In order to install the plugin follow the first 2 configuration steps described [here](#setting-up-the-ocm-backend-package). Then add the following lines to the `packages/backend/src/index.ts` file.
 
-```ts
-import { ocmPlugin } from '@janus-idp/backstage-plugin-ocm-backend';
+```ts title="packages/backend/src/index.ts"
+import {
+  catalogModuleOCMEntityProvider,
+  ocmPlugin,
+} from '@janus-idp/backstage-plugin-ocm-backend/alpha';
 
-backend.add(ocmPlugin());
+const backend = createBackend();
+/* highlight-add-next-line */ backend.add(catalogModuleOCMEntityProvider);
+backend.add(ocmPlugin);
+
+backend.start();
 ```
+
+---
+
+**NOTE**
+The default schedule for the OCM plugin has a frequency of 1 hour and a timeout of 15 minutes. If you want to modify the schedule, you can do so by specifying the `schedule` field in the `app-config.yaml` file as follows:
+
+```yaml title="app-config.yaml"
+catalog:
+  providers:
+    ocm:
+      env:
+        # ...
+        # highlight-add-start
+        schedule: # optional; same options as in TaskScheduleDefinition
+          # supports cron, ISO duration, "human duration" as used in code
+          frequency: { minutes: 1 } # Customize with your desired frequency
+          # supports ISO duration, "human duration" as used in code
+          timeout: { minutes: 1 } # Customize with your desired timeout
+        # highlight-add-end
+```
+
+---
 
 #### Setting up the OCM frontend package
 
@@ -283,8 +306,7 @@ backend.add(ocmPlugin());
    - `OcmPage`: This is a standalone page or dashboard displaying all clusters as tiles. You can add `OcmPage` to `packages/app/src/App.tsx` file as follows:
 
      ```tsx title="packages/app/src/App.tsx"
-     /* highlight-add-next-line */
-     import { OcmPage } from '@janus-idp/backstage-plugin-ocm';
+     /* highlight-add-next-line */ import { OcmPage } from '@janus-idp/backstage-plugin-ocm';
 
      const routes = (
        <FlatRoutes>
@@ -298,8 +320,7 @@ backend.add(ocmPlugin());
      You can also update navigation in `packages/app/src/components/Root/Root.tsx` as follows:
 
      ```tsx title="packages/app/src/components/Root/Root.tsx"
-     /* highlight-add-next-line */
-     import StorageIcon from '@material-ui/icons/Storage';
+     /* highlight-add-next-line */ import StorageIcon from '@material-ui/icons/Storage';
 
      export const Root = ({ children }: PropsWithChildren<{}>) => (
        <SidebarPage>

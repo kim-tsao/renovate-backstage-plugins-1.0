@@ -1,5 +1,6 @@
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { useApi } from '@backstage/core-plugin-api';
+
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useTags } from './quay';
 
@@ -19,6 +20,42 @@ describe('useTags', () => {
     await waitFor(() => {
       expect(result.current.loading).toBeFalsy();
       expect(result.current.data).toHaveLength(1);
+    });
+  });
+
+  it('should return security status for tags', async () => {
+    (useApi as jest.Mock).mockReturnValue({
+      getSecurityDetails: jest
+        .fn()
+        .mockReturnValue({ data: null, status: 'unsupported' }),
+      getTags: jest.fn().mockReturnValue({
+        tags: [{ name: 'tag1', manifest_digest: 'manifestDigest' }],
+      }),
+    });
+    const { result } = renderHook(() => useTags('foo', 'bar'));
+    await waitFor(() => {
+      expect(result.current.loading).toBeFalsy();
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].securityStatus).toBe('unsupported');
+      expect(result.current.data[0].securityDetails).toBeUndefined();
+    });
+  });
+
+  it('should return tag layers as security details for tags', async () => {
+    (useApi as jest.Mock).mockReturnValue({
+      getSecurityDetails: jest
+        .fn()
+        .mockReturnValue({ data: { Layer: {} }, status: 'scanned' }),
+      getTags: jest.fn().mockReturnValue({
+        tags: [{ name: 'tag1', manifest_digest: 'manifestDigest' }],
+      }),
+    });
+    const { result } = renderHook(() => useTags('foo', 'bar'));
+    await waitFor(() => {
+      expect(result.current.loading).toBeFalsy();
+      expect(result.current.data).toHaveLength(1);
+      expect(result.current.data[0].securityStatus).toBe('scanned');
+      expect(result.current.data[0].securityDetails).toEqual({});
     });
   });
 });

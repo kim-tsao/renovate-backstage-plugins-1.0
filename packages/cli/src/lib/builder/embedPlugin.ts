@@ -81,11 +81,13 @@ export function embedModules(options: EmbedModulesOptions): Plugin {
       // We decorate any existing `external` option with our own way of determining
       // if a module should be external.
       const external: InputOptions['external'] = (id, importer, isResolved) => {
+        const importedId = id.replace(/\/alpha$/, '');
+
         // The piece that we're adding
-        if (filter(id) && importer !== undefined) {
-          if (!embedded.has(id)) {
-            embedded.add(id);
-            console.log(`Embedding module ${id}`);
+        if (filter(importedId) && importer !== undefined) {
+          if (!embedded.has(importedId)) {
+            embedded.add(importedId);
+            console.log(`Embedding module ${importedId}`);
           }
           return false;
         }

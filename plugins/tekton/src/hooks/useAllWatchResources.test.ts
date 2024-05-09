@@ -1,6 +1,6 @@
 import { KubernetesObjects } from '@backstage/plugin-kubernetes';
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { kubernetesObjects } from '../__fixtures__/kubernetesObject';
 import { ModelsPlural } from '../models';
@@ -29,7 +29,7 @@ describe('useAllWatchResources', () => {
     const { result } = renderHook(() =>
       useAllWatchResources(k8sObjectsResponse, 0, watchedResources),
     );
-    expect(result.current?.pipelineruns?.data).toHaveLength(2);
+    expect(result.current?.pipelineruns?.data).toHaveLength(5);
     expect(result.current?.taskruns).toBeUndefined();
   });
 
@@ -61,6 +61,6 @@ describe('useAllWatchResources', () => {
       error: '',
     } as KubernetesObjects;
     rerender();
-    expect(result.current?.pipelineruns?.data).toHaveLength(2);
+    expect(result.current?.pipelineruns?.data).toHaveLength(5);
   });
 });

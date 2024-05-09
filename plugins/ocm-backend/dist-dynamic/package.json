@@ -1,6 +1,6 @@
 {
   "name": "@janus-idp/backstage-plugin-ocm-backend-dynamic",
-  "version": "3.2.3",
+  "version": "3.5.3",
   "main": "dist/index.cjs.js",
   "types": "dist/index.d.ts",
   "license": "Apache-2.0",
@@ -12,20 +12,32 @@
   "backstage": {
     "role": "backend-plugin"
   },
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.cjs.js"
+    },
+    "./alpha": {
+      "require": "./dist/alpha.cjs.js",
+      "default": "./dist/alpha.cjs.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "start": "backstage-cli package start",
     "build": "backstage-cli package build",
-    "tsc": "tsc",
-    "lint": "backstage-cli package lint",
-    "test": "backstage-cli package test --passWithNoTests --coverage",
     "clean": "backstage-cli package clean",
-    "prepack": "backstage-cli package prepack",
+    "export-dynamic": "janus-cli package export-dynamic-plugin --embed-package --embed-package @backstage/plugin-kubernetes-common",
+    "lint": "backstage-cli package lint",
     "postpack": "backstage-cli package postpack",
-    "export-dynamic": "janus-cli package export-dynamic-plugin --embed-package --embed-package @backstage/plugin-kubernetes-common"
+    "postversion": "yarn run export-dynamic",
+    "prepack": "backstage-cli package prepack",
+    "start": "backstage-cli package start",
+    "test": "backstage-cli package test --passWithNoTests --coverage",
+    "tsc": "tsc"
   },
   "configSchema": "config.d.ts",
   "dependencies": {
-    "@kubernetes/client-node": "^0.19.0",
+    "@kubernetes/client-node": "^0.20.0",
     "express": "^4.18.2",
     "express-promise-router": "^4.1.1",
     "semver": "^7.5.4",
@@ -38,7 +50,8 @@
   "files": [
     "dist",
     "config.d.ts",
-    "app-config.yaml"
+    "app-config.janus-idp.yaml",
+    "alpha"
   ],
   "repository": "github:janus-idp/backstage-plugins",
   "keywords": [
@@ -49,17 +62,15 @@
   "bugs": "https://github.com/janus-idp/backstage-plugins/issues",
   "bundleDependencies": true,
   "peerDependencies": {
-    "@backstage/backend-common": "^0.19.8",
-    "@backstage/backend-plugin-api": "^0.6.6",
-    "@backstage/backend-tasks": "^0.5.11",
-    "@backstage/catalog-client": "^1.4.5",
-    "@backstage/catalog-model": "^1.4.3",
+    "@backstage/backend-common": "^0.21.0",
+    "@backstage/backend-plugin-api": "^0.6.10",
+    "@backstage/backend-tasks": "^0.5.15",
+    "@backstage/catalog-client": "^1.6.0",
+    "@backstage/catalog-model": "^1.4.4",
     "@backstage/config": "^1.1.1",
-    "@backstage/plugin-catalog-node": "^1.4.7",
-    "@backstage/backend-plugin-manager": "npm:@janus-idp/backend-plugin-manager@0.0.2-janus.5",
-    "@backstage/core-plugin-api": "^1.7.0",
-    "@backstage/errors": "^1.2.3",
-    "@backstage/plugin-permission-common": "^0.7.9",
+    "@backstage/plugin-catalog-node": "^1.7.0",
+    "@backstage/backend-dynamic-feature-service": "^0.2.0",
+    "@backstage/plugin-permission-common": "^0.7.12",
     "@backstage/types": "^1.1.1"
   },
   "overrides": {
@@ -68,6 +79,6 @@
     }
   },
   "resolutions": {
-    "@aws-sdk/util-utf8-browser": "npm:@smithy/util-utf8@^2.0.0"
+    "@aws-sdk/util-utf8-browser": "npm:@smithy/util-utf8@~2"
   }
 }

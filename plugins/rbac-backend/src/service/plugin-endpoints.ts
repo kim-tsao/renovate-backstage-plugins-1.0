@@ -19,8 +19,7 @@ import {
 import { Logger } from 'winston';
 
 import { Policy } from '@janus-idp/backstage-plugin-rbac-common';
-
-import { PluginIdProvider } from './policy-builder';
+import { PluginIdProvider } from '@janus-idp/backstage-plugin-rbac-node';
 
 type PluginMetadataResponse = {
   pluginId: string;
@@ -44,8 +43,8 @@ export class PluginPermissionMetadataCollector {
   constructor(
     private readonly discovery: PluginEndpointDiscovery,
     private readonly pluginIdProvider: PluginIdProvider,
+    private readonly logger: Logger,
     config: Config,
-    logger: Logger,
   ) {
     this.pluginIds = this.pluginIdProvider.getPluginIds();
     this.urlReader = UrlReaders.default({
@@ -98,7 +97,13 @@ export class PluginPermissionMetadataCollector {
       try {
         const permResp = await this.urlReader.readUrl(wellKnownURL);
         const permMetaDataRaw = (await permResp.buffer()).toString();
-        const permMetaData = JSON.parse(permMetaDataRaw);
+        let permMetaData;
+        try {
+          permMetaData = JSON.parse(permMetaDataRaw);
+        } catch (err) {
+          // workaround for https://issues.redhat.com/browse/RHIDP-1456
+          continue;
+        }
         if (permMetaData) {
           pluginResponses = [
             ...pluginResponses,
@@ -109,9 +114,12 @@ export class PluginPermissionMetadataCollector {
           ];
         }
       } catch (err) {
-        if (!isError(err) || err.name !== 'NotFoundError') {
-          throw err;
+        if (isError(err) && err.name === 'NotFoundError') {
+          continue;
         }
+        this.logger.error(
+          `Failed to retrieve permission metadata for ${pluginId}. ${err}`,
+        );
       }
     }
     return pluginResponses;
@@ -119,13 +127,18 @@ export class PluginPermissionMetadataCollector {
 }
 
 function permissionsToCasbinPolicies(permissions: Permission[]): Policy[] {
-  return permissions.map(permission => {
-    const policy: Policy = {
-      permission: isResourcePermission(permission)
-        ? permission.resourceType
-        : permission.name,
+  const policies = [];
+  for (const permission of permissions) {
+    if (isResourcePermission(permission)) {
+      policies.push({
+        permission: permission.resourceType,
+        policy: permission.attributes.action || 'use',
+      });
+    }
+    policies.push({
+      permission: permission.name,
       policy: permission.attributes.action || 'use',
-    };
-    return policy;
-  });
+    });
+  }
+  return policies;
 }

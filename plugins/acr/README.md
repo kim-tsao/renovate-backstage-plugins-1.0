@@ -17,14 +17,15 @@ The Azure Container Registry (ACR) plugin displays information about your contai
    ```yaml
    # app-config.yaml
    proxy:
-     '/acr/api':
-       target: 'https://mycontainerregistry.azurecr.io/acr/v1/'
-       changeOrigin: true
-       headers:
-         # If you use Bearer Token for authorization, please replace the 'Basic' with 'Bearer' in the following line.
-         Authorization: 'Basic ${ACR_AUTH_TOKEN}'
-       # Change to "false" in case of using self hosted artifactory instance with a self-signed certificate
-       secure: true
+     endpoints:
+       '/acr/api':
+         target: 'https://mycontainerregistry.azurecr.io/acr/v1/'
+         changeOrigin: true
+         headers:
+           # If you use Bearer Token for authorization, please replace the 'Basic' with 'Bearer' in the following line.
+           Authorization: 'Basic ${ACR_AUTH_TOKEN}'
+         # Change to "false" in case of using self hosted artifactory instance with a self-signed certificate
+         secure: true
    ```
 
 1. Set the authorization using one of the following options:
@@ -49,12 +50,12 @@ The Azure Container Registry (ACR) plugin displays information about your contai
 1. Enable an additional tab on the entity view page using the `packages/app/src/components/catalog/EntityPage.tsx` file as follows:
 
    ```tsx title="packages/app/src/components/catalog/EntityPage.tsx"
-   /* highlight-add-start */
-   import { AcrPage, isAcrAvailable } from '@janus-idp/backstage-plugin-acr';
+   /* highlight-add-start */ import {
+     AcrPage,
+     isAcrAvailable,
+   } from '@janus-idp/backstage-plugin-acr';
 
-   /* highlight-add-end */
-
-   const serviceEntityPage = (
+   /* highlight-add-end */ const serviceEntityPage = (
      <EntityLayout>
        // ...
        {/* highlight-add-start */}

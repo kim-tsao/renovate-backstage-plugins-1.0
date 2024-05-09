@@ -15,20 +15,23 @@
  */
 
 import { BackstagePackageJson, PackageRoleInfo } from '@backstage/cli-node';
+import { ConfigReader } from '@backstage/config';
+import { loadConfig } from '@backstage/config-loader';
 
 import { getPackages } from '@manypkg/get-packages';
 import { OptionValues } from 'commander';
 import fs from 'fs-extra';
-import { rollup } from 'rollup';
+import { InteropType, rollup } from 'rollup';
 import * as semver from 'semver';
 
+import { execSync } from 'child_process';
 import path, { basename } from 'path';
 
 import { Output } from '../../lib/builder';
 import { makeRollupConfigs } from '../../lib/builder/config';
 import { embedModules } from '../../lib/builder/embedPlugin';
 import { buildPackage, formatErrorMessage } from '../../lib/builder/packager';
-import { loadCliConfig } from '../../lib/config';
+import { readEntryPoints } from '../../lib/entryPoints';
 import { productionPack } from '../../lib/packager/productionPack';
 import { paths } from '../../lib/paths';
 import { Task } from '../../lib/tasks';
@@ -38,8 +41,8 @@ export async function backend(
   opts: OptionValues,
 ): Promise<void> {
   if (!fs.existsSync(paths.resolveTarget('src', 'dynamic'))) {
-    throw new Error(
-      `Package doesn't seem to support dynamic loading. It should have a src/dynamic folder, containing the dynamic loading entrypoints.`,
+    console.warn(
+      `Package doesn't seem to provide dynamic loading entrypoints. You might want to add dynamic loading entrypoints in a src/dynamic folder.`,
     );
   }
 
@@ -65,13 +68,18 @@ export async function backend(
 
   const target = path.join(paths.targetDir, 'dist-dynamic');
 
-  if (
-    !pkg.files?.includes('dist-dynamic/*.*') ||
-    !pkg.files?.includes('dist-dynamic/dist/**') ||
-    !pkg.files?.includes('dist-dynamic/alpha/*')
-  ) {
-    throw new Error(
-      `Package doesn't seem to support dynamic loading: its "files" property should include the following entries: ["dist-dynamic/*.*", "dist-dynamic/dist/**", "dist-dynamic/alpha/*"].`,
+  const requiredFiles = ['dist-dynamic/*.*', 'dist-dynamic/dist/**'];
+
+  const entryPoints = readEntryPoints(pkg);
+  if (entryPoints.find(e => e.mount === './alpha')) {
+    requiredFiles.push('dist-dynamic/alpha/*');
+  }
+
+  if (requiredFiles.some(f => !pkg.files?.includes(f))) {
+    console.warn(
+      `Package doesn't seem to fully support dynamic loading: its "files" property should include the following entries: [${requiredFiles
+        .map(f => `"${f}"`)
+        .join(', ')}].`,
     );
   }
 
@@ -80,6 +88,10 @@ export async function backend(
   const commonPackage = pkg.name.replace(/-backend$/, '-common');
   if (commonPackage !== pkg.name) {
     mergeWithOutput.push(commonPackage);
+  }
+  const nodePackage = pkg.name.replace(/-backend$/, '-node');
+  if (nodePackage !== pkg.name) {
+    mergeWithOutput.push(nodePackage);
   }
 
   if (opts.embedPackage !== undefined) {
@@ -93,6 +105,10 @@ export async function backend(
       const relatedCommonPackage = pkgToEmbed.replace(/-backend$/, '-common');
       if (relatedCommonPackage !== pkgToEmbed) {
         mergeWithOutput.push(relatedCommonPackage);
+      }
+      const relatedNodePackage = pkgToEmbed.replace(/-backend$/, '-node');
+      if (relatedNodePackage !== pkgToEmbed) {
+        mergeWithOutput.push(relatedNodePackage);
       }
     }
   }
@@ -116,6 +132,21 @@ export async function backend(
     .filter(p => p.startsWith('!'))
     .map(p => p.slice(1))
     .map(stringOrRegexp);
+
+  let interopForAll: InteropType | undefined = undefined;
+  const interopForPackage: { [key: string]: InteropType } = {};
+  for (const mode in opts.overrideInterop) {
+    if (!Object.prototype.hasOwnProperty.call(opts.overrideInterop, mode)) {
+      continue;
+    }
+
+    if (!opts.overrideInterop[mode]?.length) {
+      interopForAll = mode as InteropType;
+    }
+    for (const interopPkg of opts.overrideInterop[mode]) {
+      interopForPackage[interopPkg] = mode as InteropType;
+    }
+  }
 
   const rollupConfigs = await makeRollupConfigs({
     outputs,
@@ -181,7 +212,20 @@ export async function backend(
   if (Array.isArray(rollupConfig.output)) {
     rollupConfig.output.forEach(output => {
       if (output.format === 'commonjs') {
-        output.interop = 'default';
+        if (interopForAll) {
+          console.log(
+            `Overriding Interop to '${interopForAll}' for all imports`,
+          );
+        }
+        output.interop = (id: string | null) => {
+          if (id && interopForPackage[id]) {
+            console.log(
+              `Overriding Interop to '${interopForPackage[id]}' for '${id}'`,
+            );
+            return interopForPackage[id];
+          }
+          return interopForAll || true; // true is the default value in Rollup.
+        };
       }
     });
   }
@@ -309,15 +353,15 @@ export async function backend(
 
       const overrides = (pkgToCustomize as any).overrides || {};
       (pkgToCustomize as any).overrides = {
-        ...overrides,
         '@aws-sdk/util-utf8-browser': {
           '@smithy/util-utf8': '^2.0.0',
         },
+        ...overrides,
       };
       const resolutions = (pkgToCustomize as any).resolutions || {};
       (pkgToCustomize as any).resolutions = {
+        '@aws-sdk/util-utf8-browser': 'npm:@smithy/util-utf8@~2',
         ...resolutions,
-        '@aws-sdk/util-utf8-browser': 'npm:@smithy/util-utf8@^2.0.0',
       };
     },
   });
@@ -332,9 +376,10 @@ export async function backend(
   }
 
   if (opts.install) {
-    const yarnInstall = `yarn install --production${
-      yarnLockExists ? ' --frozen-lockfile' : ''
-    }`;
+    const version = execSync('yarn --version').toString().trim();
+    const yarnInstall = version.startsWith('1.')
+      ? `yarn install --production${yarnLockExists ? ' --frozen-lockfile' : ''}`
+      : `yarn install${yarnLockExists ? ' --immutable' : ''}`;
 
     await Task.forCommand(yarnInstall, { cwd: target, optional: false });
     await fs.remove(paths.resolveTarget('dist-dynamic', '.yarn'));
@@ -349,35 +394,38 @@ export async function backend(
   });
 
   if (opts.dev) {
-    if (opts.dev) {
-      const { fullConfig } = await loadCliConfig({ args: [] });
-      const dynamicPlugins = fullConfig.getOptional('dynamicPlugins');
-      if (
-        typeof dynamicPlugins === 'object' &&
-        dynamicPlugins !== null &&
-        'rootDirectory' in dynamicPlugins &&
-        typeof dynamicPlugins.rootDirectory === 'string'
-      ) {
-        await fs.ensureSymlink(
-          paths.resolveTarget('src'),
-          path.resolve(target, 'src'),
-          'dir',
-        );
-        const dynamicPluginsRootPath = path.isAbsolute(
-          dynamicPlugins.rootDirectory,
-        )
-          ? dynamicPlugins.rootDirectory
-          : paths.resolveTargetRoot(dynamicPlugins.rootDirectory);
-        await fs.ensureSymlink(
-          target,
-          path.resolve(dynamicPluginsRootPath, basename(paths.targetDir)),
-          'dir',
-        );
-      } else {
-        throw new Error(
-          `'dynamicPlugins.rootDirectory' should be configured in the app config in order to use the --dev option.`,
-        );
-      }
+    const appConfigs = await loadConfig({
+      configRoot: paths.targetRoot,
+      configTargets: [],
+    });
+    const fullConfig = ConfigReader.fromConfigs(appConfigs.appConfigs);
+
+    const dynamicPlugins = fullConfig.getOptional('dynamicPlugins');
+    if (
+      typeof dynamicPlugins === 'object' &&
+      dynamicPlugins !== null &&
+      'rootDirectory' in dynamicPlugins &&
+      typeof dynamicPlugins.rootDirectory === 'string'
+    ) {
+      await fs.ensureSymlink(
+        paths.resolveTarget('src'),
+        path.resolve(target, 'src'),
+        'dir',
+      );
+      const dynamicPluginsRootPath = path.isAbsolute(
+        dynamicPlugins.rootDirectory,
+      )
+        ? dynamicPlugins.rootDirectory
+        : paths.resolveTargetRoot(dynamicPlugins.rootDirectory);
+      await fs.ensureSymlink(
+        target,
+        path.resolve(dynamicPluginsRootPath, basename(paths.targetDir)),
+        'dir',
+      );
+    } else {
+      throw new Error(
+        `'dynamicPlugins.rootDirectory' should be configured in the app config in order to use the --dev option.`,
+      );
     }
   }
 }
