@@ -255,10 +255,10 @@
     "**/dist-dynamic/**"
   ],
   "vulnerabilityAlerts": {
+    "branchTopic": "{{{datasource}}}-{{{depName}}}-vulnerability",
     "enabled": true,
     "addLabels": [
-      "kind/security",
-      "team/{{additionalBranchPrefix}}"
+      "kind/security"
     ]
   },
   "osvVulnerabilityAlerts": true
