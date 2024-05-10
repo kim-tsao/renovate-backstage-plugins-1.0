@@ -255,6 +255,7 @@
     "**/dist-dynamic/**"
   ],
   "vulnerabilityAlerts": {
+    "additionalBranchPrefix": "",
     "branchTopic": "{{{datasource}}}-{{{depName}}}-vulnerability",
     "enabled": true,
     "addLabels": [
