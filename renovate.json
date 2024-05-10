@@ -222,7 +222,6 @@
     },
     {
       "matchFileNames": [ 
-        "yarn.lock",
         "package.json"  
       ],
       "additionalBranchPrefix": "rhdh ",
