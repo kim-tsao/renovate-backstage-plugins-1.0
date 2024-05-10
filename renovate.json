@@ -140,9 +140,6 @@
       "groupName": "Keycloak dependency"
     },
     {
-      "additionalBranchPrefix": "rhdh "
-    },
-    {
       "matchFileNames": [
         "plugins/orchestrator*/**"
       ],
@@ -212,7 +209,9 @@
         "plugins/topology*/**",
         "plugins/analytics-provider-segment*/**",
         "plugins/dynamic-frontend-plugin*/**",
-        "packages/**"
+        "packages/**",
+        "yarn.lock",
+        "package.json"        
       ],
       "additionalBranchPrefix": "rhdh ",
       "matchPackagePatterns": [
