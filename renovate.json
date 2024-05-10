@@ -248,7 +248,7 @@
     "enabled": true,
     "addLabels": [
       "kind/security",
-      "team/{{additionalBranchPrefix}}"
+      "team/{{#if (containsString {{additionalBranchPrefix}} '')}}rhdh{{else}}{{additionalBranchPrefix}}{{/if}}"
     ]
   },
   "osvVulnerabilityAlerts": true
