@@ -40,9 +40,6 @@
         "dependencies"
       ],
       "groupName": "{{additionalBranchPrefix}} Dependencies (minor)",
-      "matchPackagePatterns": [
-        "*"
-      ],
       "matchUpdateTypes": [
         "minor",
         "patch"
@@ -53,9 +50,6 @@
         "dependencies"
       ],
       "groupName": "{{additionalBranchPrefix}} Dependencies",
-      "matchPackagePatterns": [
-        "*"
-      ],
       "matchUpdateTypes": [
         "major"
       ]
@@ -68,6 +62,7 @@
         "patch",
         "minor"
       ],
+      "matchCurrentVersion": "!/^0/",      
       "groupName": "{{additionalBranchPrefix}} DevDependencies (minor)",
       "automerge": true,
       "ignoreTests": true 
@@ -89,6 +84,7 @@
         "patch",
         "minor"
       ],
+      "matchCurrentVersion": "!/^0/",      
       "groupName": "{{additionalBranchPrefix}}  Test packages (minor)",
       "automerge": true
     },
@@ -143,48 +139,36 @@
       "matchFileNames": [
         "plugins/orchestrator*/**"
       ],
-      "additionalBranchPrefix": "orchestrator ",
+      "additionalBranchPrefix": "orchestrator",
       "addLabels": [
         "team/orchestrator"
-      ],
-      "matchPackagePatterns": [
-        ".*"
       ]
     },
     {
       "matchFileNames": [
         "plugins/notifications*/**"
       ],
-      "additionalBranchPrefix": "notifications ",
+      "additionalBranchPrefix": "notifications",
       "addLabels": [
         "team/notifications"
-      ],
-      "matchPackagePatterns": [
-        ".*"
       ]
     },
     {
       "matchFileNames": [
         "plugins/kiali*/**"
       ],
-      "additionalBranchPrefix": "kiali ",
+      "additionalBranchPrefix": "kiali",
       "addLabels": [
         "team/kiali"
-      ],
-      "matchPackagePatterns": [
-        ".*"
       ]
     },
     {
       "matchFileNames": [
         "plugins/*matomo*/**"
       ],
-      "additionalBranchPrefix": "devex ",
+      "additionalBranchPrefix": "devex",
       "addLabels": [
         "team/devex"
-      ],
-      "matchPackagePatterns": [
-        ".*"
       ]
     },
     {
@@ -192,12 +176,9 @@
         "plugins/quay*/**",
         "plugins/tekton*/**"
       ],
-      "additionalBranchPrefix": "rhtap ",
+      "additionalBranchPrefix": "rhtap",
       "addLabels": [
         "team/rhtap"
-      ],
-      "matchPackagePatterns": [
-        ".*"
       ]
     },
     {
@@ -209,13 +190,10 @@
         "plugins/topology*/**",
         "plugins/analytics-provider-segment*/**",
         "plugins/dynamic-frontend-plugin*/**",
+        "plugins/scaffolder-annotator-action*/**",        
         "packages/**"
-    
       ],
-      "additionalBranchPrefix": "rhdh ",
-      "matchPackagePatterns": [
-        ".*"
-      ],
+      "additionalBranchPrefix": "rhdh",
       "addLabels": [
         "team/rhdh"
       ]
@@ -224,7 +202,7 @@
       "matchFileNames": [ 
         "package.json"  
       ],
-      "additionalBranchPrefix": "rhdh ",
+      "additionalBranchPrefix": "rhdh",
       "addLabels": [
         "team/rhdh"
       ]  
@@ -239,13 +217,11 @@
         "plugins/nexus-repository-manager*/**",
         "plugins/openshift-image-registry*/**",
         "plugins/servicenow-actions*/**",
+
         "plugins/shared-react*/**",
         "plugins/sonarqube-actions*/**"
       ],
       "additionalBranchPrefix": "community ",
-      "matchPackagePatterns": [
-        ".*"
-      ],
       "addLabels": [
         "team/community"
       ]
@@ -256,7 +232,6 @@
   ],
   "vulnerabilityAlerts": {
     "additionalBranchPrefix": "",
-    "branchTopic": "{{{datasource}}}-{{{depName}}}-vulnerability",
     "enabled": true,
     "addLabels": [
       "kind/security"
