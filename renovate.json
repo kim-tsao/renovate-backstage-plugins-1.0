@@ -209,9 +209,8 @@
         "plugins/topology*/**",
         "plugins/analytics-provider-segment*/**",
         "plugins/dynamic-frontend-plugin*/**",
-        "packages/**",
-        "^yarn.lock",
-        "^package.json"        
+        "packages/**"
+    
       ],
       "additionalBranchPrefix": "rhdh ",
       "matchPackagePatterns": [
@@ -220,6 +219,16 @@
       "addLabels": [
         "team/rhdh"
       ]
+    },
+    {
+      "matchFileNames": [ 
+        "yarn.lock",
+        "package.json"  
+      ],
+      "additionalBranchPrefix": "rhdh ",
+      "addLabels": [
+        "team/rhdh"
+      ]  
     },
     {
       "matchFileNames": [
