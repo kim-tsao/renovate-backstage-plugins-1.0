@@ -69,7 +69,8 @@
         "minor"
       ],
       "groupName": "{{additionalBranchPrefix}} DevDependencies (minor)",
-      "automerge": true
+      "automerge": true,
+      "ignoreTests": true 
     },
     {
       "matchDepTypes": [
@@ -142,7 +143,7 @@
       "matchFileNames": [
         "plugins/orchestrator*/**"
       ],
-      "additionalBranchPrefix": "orchestrator -",
+      "additionalBranchPrefix": "orchestrator ",
       "addLabels": [
         "team/orchestrator"
       ],
@@ -154,7 +155,7 @@
       "matchFileNames": [
         "plugins/notifications*/**"
       ],
-      "additionalBranchPrefix": "notifications -",
+      "additionalBranchPrefix": "notifications ",
       "addLabels": [
         "team/notifications"
       ],
@@ -166,7 +167,7 @@
       "matchFileNames": [
         "plugins/kiali*/**"
       ],
-      "additionalBranchPrefix": "kiali -",
+      "additionalBranchPrefix": "kiali ",
       "addLabels": [
         "team/kiali"
       ],
@@ -178,7 +179,7 @@
       "matchFileNames": [
         "plugins/*matomo*/**"
       ],
-      "additionalBranchPrefix": "devex -",
+      "additionalBranchPrefix": "devex ",
       "addLabels": [
         "team/devex"
       ],
@@ -191,7 +192,7 @@
         "plugins/quay*/**",
         "plugins/tekton*/**"
       ],
-      "additionalBranchPrefix": "rhtap -",
+      "additionalBranchPrefix": "rhtap ",
       "addLabels": [
         "team/rhtap"
       ],
@@ -210,7 +211,7 @@
         "plugins/dynamic-frontend-plugin*/**",
         "packages/**"
       ],
-      "additionalBranchPrefix": "rhdh -",
+      "additionalBranchPrefix": "rhdh ",
       "matchPackagePatterns": [
         ".*"
       ],
@@ -231,7 +232,7 @@
         "plugins/shared-react*/**",
         "plugins/sonarqube-actions*/**"
       ],
-      "additionalBranchPrefix": "community -",
+      "additionalBranchPrefix": "community ",
       "matchPackagePatterns": [
         ".*"
       ],
@@ -246,7 +247,8 @@
   "vulnerabilityAlerts": {
     "enabled": true,
     "addLabels": [
-      "kind/security"
+      "kind/security",
+      "team/{{additionalBranchPrefix}}"
     ]
   },
   "osvVulnerabilityAlerts": true
