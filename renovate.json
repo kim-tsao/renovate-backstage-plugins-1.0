@@ -210,8 +210,8 @@
         "plugins/analytics-provider-segment*/**",
         "plugins/dynamic-frontend-plugin*/**",
         "packages/**",
-        "yarn.lock",
-        "package.json"        
+        "^yarn.lock",
+        "^package.json"        
       ],
       "additionalBranchPrefix": "rhdh ",
       "matchPackagePatterns": [
