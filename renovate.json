@@ -140,6 +140,9 @@
       "groupName": "Keycloak dependency"
     },
     {
+      "additionalBranchPrefix": "rhdh "
+    },
+    {
       "matchFileNames": [
         "plugins/orchestrator*/**"
       ],
@@ -248,7 +251,7 @@
     "enabled": true,
     "addLabels": [
       "kind/security",
-      "team/{{#if (containsString {{additionalBranchPrefix}} '')}}rhdh{{else}}{{additionalBranchPrefix}}{{/if}}"
+      "team/{{additionalBranchPrefix}}"
     ]
   },
   "osvVulnerabilityAlerts": true
