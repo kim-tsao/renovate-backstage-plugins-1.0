@@ -45,7 +45,7 @@
     "@backstage/catalog-client": "^1.6.3",
     "@backstage/catalog-model": "^1.4.5",
     "@backstage/plugin-scaffolder-node": "^0.4.2",
-    "@kubernetes/client-node": "^0.20.0"
+    "@kubernetes/client-node": "^0.21.0"
   },
   "devDependencies": {
     "@backstage/backend-common": "0.21.6",
