@@ -490,7 +490,24 @@
         "major"
       ],
       "groupName": "react"
-    }                    
+    },
+    {
+      "extends": ["packages:linters"],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "matchCurrentVersion": "!/^0/",        
+      "groupName": "linters  (non-major)",
+      "automerge": true
+    },    
+    {
+      "extends": ["packages:linters"],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "linters"
+    },                            
   ],
   {
     "matchPackagePrefixes": [
