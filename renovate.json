@@ -61,8 +61,7 @@
         "packages:test"
       ],
       "matchDepPatterns": [
-        "^@playwright/",
-        "@storybook"
+        "^@playwright/"
       ],
       "matchUpdateTypes": [
         "patch",
@@ -77,14 +76,36 @@
         "packages:test"
       ],
       "matchDepPatterns": [
-        "^@playwright/",
-        "@storybook"
+        "^@playwright/"
       ],      
       "matchUpdateTypes": [
         "major"
       ],
       "groupName": "Test packages"
     },
+    {
+      "extends": [
+        "monorepo:storybook",
+        "monorepo:storybook-react-native"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "matchCurrentVersion": "!/^0/",      
+      "groupName": "Storybook packages (minor)",
+      "automerge": true
+    },
+    {
+      "extends": [
+        "monorepo:storybook",
+        "monorepo:storybook-react-native"
+      ],    
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Storybook packages"
+    },    
     {
       "matchDepPatterns": [
         "^@backstage/"
