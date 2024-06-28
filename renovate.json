@@ -60,6 +60,10 @@
       "extends": [
         "packages:test"
       ],
+      "matchDepPatterns": [
+        "^@playwright/",
+        "@storybook"
+      ],
       "matchUpdateTypes": [
         "patch",
         "minor"
@@ -72,6 +76,10 @@
       "extends": [
         "packages:test"
       ],
+      "matchDepPatterns": [
+        "^@playwright/",
+        "@storybook"
+      ],      
       "matchUpdateTypes": [
         "major"
       ],
@@ -484,6 +492,25 @@
       "groupName": "react"
     }                    
   ],
+  {
+    "matchPackagePrefixes": [
+      "@types/"
+    ],
+    "matchUpdateTypes": [
+      "patch",
+      "minor"
+    ],
+    "groupName": "types (non-major)"      
+  },    
+  {
+    "matchPackagePrefixes": [
+      "@types/"
+    ],
+    "matchUpdateTypes": [
+      "major"
+    ],
+    "groupName": "types "      
+  },      
   "ignorePaths": [
     "**/dist-dynamic/**"
   ],
