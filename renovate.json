@@ -556,7 +556,26 @@
         "major"
       ],
       "groupName": "types "
-    }
+    },
+    {
+      "matchSourceUrls": [
+        "https://github.com/scalprum/scaffolding"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "Scaffolding (non-major)"   
+    },
+    {
+      "matchSourceUrls": [
+        "https://github.com/scalprum/scaffolding"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Scaffolding "   
+    }    
   ],
   "ignorePaths": [
     "**/dist-dynamic/**"
