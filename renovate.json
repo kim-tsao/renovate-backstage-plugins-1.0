@@ -485,6 +485,9 @@
         "minor"
       ],
       "groupName": "material-ui (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ],
       "automerge": true
     },
     {
@@ -494,7 +497,10 @@
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": "material-ui"
+      "groupName": "material-ui",
+      "addLabels": [
+        "team/rhdh"
+      ]
     },
     {
       "extends": [
@@ -505,6 +511,9 @@
         "minor"
       ],
       "groupName": "react (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ],
       "automerge": true
     },
     {
@@ -514,7 +523,10 @@
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": "react"
+      "groupName": "react",
+      "addLabels": [
+        "team/rhdh"
+      ]
     },
     {
       "extends": [
@@ -526,7 +538,10 @@
       ],
       "matchCurrentVersion": "!/^0/",
       "groupName": "linters  (non-major)",
-      "automerge": true
+      "automerge": true,
+      "addLabels": [
+        "team/rhdh"
+      ]
     },
     {
       "extends": [
@@ -545,7 +560,10 @@
         "patch",
         "minor"
       ],
-      "groupName": "types (non-major)"
+      "groupName": "types (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]
     },
     {
       "matchPackagePrefixes": [
@@ -557,11 +575,29 @@
       "groupName": "types "
     },
     {
-      "description": "Scalprum monorepo",
-      "matchSourceUrls": [
-        "https://github.com/scalprum/scaffolding"
+      "matchPackagePrefixes": [
+        "@scalprum/"
       ],
-      "groupName": "Scalprum "
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "Scalprum (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
+      "matchPackagePrefixes": [
+        "@scalprum/"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Scalprum ",
+      "addLabels": [
+        "team/rhdh"
+      ]
     }
   ],
   "separateMajorMinor": true,
