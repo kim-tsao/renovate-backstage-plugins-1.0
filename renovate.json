@@ -18,8 +18,6 @@
     "minimumReleaseAge": "1 day"
   },
   "dependencyDashboardApproval": true,
-  "recreateWhen": "never",
-  "prCreation": "status-success",
   "packageRules": [
     {
       "description": "Do automerge and pin actions in GH workflows, except for versions starting with 0",
@@ -40,7 +38,7 @@
         "dependencies",
         "peerDependencies"
       ],
-      "groupName": "{{additionalBranchPrefix}} Dependencies (minor)",
+      "groupName": "Dependencies (non-major)",
       "matchUpdateTypes": [
         "minor",
         "patch"
@@ -51,7 +49,7 @@
         "dependencies",
         "peerDependencies"
       ],
-      "groupName": "{{additionalBranchPrefix}} Dependencies",
+      "groupName": "Dependencies",
       "matchUpdateTypes": [
         "major"
       ]
@@ -65,7 +63,7 @@
         "minor"
       ],
       "matchCurrentVersion": "!/^0/",      
-      "groupName": "{{additionalBranchPrefix}} DevDependencies (minor)",
+      "groupName": "DevDependencies (non-major)",
       "automerge": true
     },
     {
@@ -75,7 +73,7 @@
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": "{{additionalBranchPrefix}} DevDependencies"
+      "groupName": "DevDependencies"
     },
     {
       "extends": [
@@ -86,7 +84,7 @@
         "minor"
       ],
       "matchCurrentVersion": "!/^0/",      
-      "groupName": "{{additionalBranchPrefix}}  Test packages (minor)",
+      "groupName": "Test packages (minor)",
       "automerge": true
     },
     {
@@ -96,7 +94,7 @@
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": "{{additionalBranchPrefix}} Test packages"
+      "groupName": "Test packages"
     },
     {
       "matchDepPatterns": [
@@ -180,6 +178,34 @@
       "additionalBranchPrefix": "orchestrator ",
       "addLabels": [
         "team/orchestrator"
+      ],
+
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Orchestrator Dependencies (non-major)",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
+    },
+    {
+      "matchFileNames": [
+        "plugins/orchestrator*/**"
+      ],
+      "additionalBranchPrefix": "orchestrator ",
+      "addLabels": [
+        "team/orchestrator"
+      ],
+
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Orchestrator Dependencies (major)",
+      "matchUpdateTypes": [
+        "major"
       ]
     },
     {
