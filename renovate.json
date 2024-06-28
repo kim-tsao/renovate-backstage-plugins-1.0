@@ -507,27 +507,28 @@
         "major"
       ],
       "groupName": "linters"
-    },                            
+    }, 
+    {
+      "matchPackagePrefixes": [
+        "@types/"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "types (non-major)"      
+    },    
+    {
+      "matchPackagePrefixes": [
+        "@types/"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "types "      
+    }                                  
   ],
-  {
-    "matchPackagePrefixes": [
-      "@types/"
-    ],
-    "matchUpdateTypes": [
-      "patch",
-      "minor"
-    ],
-    "groupName": "types (non-major)"      
-  },    
-  {
-    "matchPackagePrefixes": [
-      "@types/"
-    ],
-    "matchUpdateTypes": [
-      "major"
-    ],
-    "groupName": "types "      
-  },      
+    
   "ignorePaths": [
     "**/dist-dynamic/**"
   ],
