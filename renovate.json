@@ -364,6 +364,67 @@
     },
     {
       "matchFileNames": [
+        "plugins/analytics-provider-segment*/**",
+        "plugins/audit-log*/**",
+        "plugins/bulk-import*/**",
+        "plugins/dynamic-plugins-info*/**",
+        "plugins/keycloak*/**",
+        "plugins/ocm*/**",
+        "plugins/quay-actions*/**",
+        "plugins/rbac*/**",
+        "plugins/regex-actions*/**",
+        "plugins/scaffolder-annotator-action*/**",
+        "plugins/shared-react*/**",
+        "plugins/topology*/**",
+        "packages/**",
+        "package.json"
+      ],
+      "additionalBranchPrefix": "rhdh ",
+      "addLabels": [
+        "team/rhdh"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "RHDH Dependencies (non-major)"
+    },
+    {
+      "matchFileNames": [
+        "plugins/analytics-provider-segment*/**",
+        "plugins/audit-log*/**",
+        "plugins/bulk-import*/**",
+        "plugins/dynamic-plugins-info*/**",
+        "plugins/keycloak*/**",
+        "plugins/ocm*/**",
+        "plugins/quay-actions*/**",
+        "plugins/rbac*/**",
+        "plugins/regex-actions*/**",
+        "plugins/scaffolder-annotator-action*/**",
+        "plugins/shared-react*/**",
+        "plugins/topology*/**",
+        "packages/**",
+        "package.json"
+      ],
+      "additionalBranchPrefix": "rhdh ",
+      "addLabels": [
+        "team/rhdh"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "RHDH Dependencies "
+    },
+    {
+      "matchFileNames": [
         "plugins/3scale-backend*/**",
         "plugins/aap-backend*/**",
         "plugins/acr*/**",
@@ -415,36 +476,6 @@
       ],
       "groupName": "Community Dependencies "
     },
-    {
-      "additionalBranchPrefix": "rhdh ",
-      "addLabels": [
-        "team/rhdh"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "matchDepTypes": [
-        "dependencies",
-        "peerDependencies"
-      ],
-      "groupName": "RHDH Dependencies "
-    },
-    {
-      "additionalBranchPrefix": "rhdh ",
-      "addLabels": [
-        "team/rhdh"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "matchDepTypes": [
-        "dependencies",
-        "peerDependencies"
-      ],
-      "groupName": "RHDH Dependencies (non-major)"
-    },
-
     {
       "extends": [
         "monorepo:material-ui"
@@ -529,7 +560,7 @@
         "patch",
         "minor"
       ],
-      "groupName": "Types (non-major)",
+      "groupName": "types (non-major)",
       "addLabels": [
         "team/rhdh"
       ]
@@ -541,10 +572,7 @@
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": "Types ",
-      "addLabels": [
-        "team/rhdh"
-      ]
+      "groupName": "types "
     },
     {
       "matchPackagePrefixes": [
