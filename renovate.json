@@ -37,27 +37,6 @@
     },
     {
       "matchDepTypes": [
-        "dependencies",
-        "peerDependencies"
-      ],
-      "groupName": "Dependencies (non-major)",
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ]
-    },
-    {
-      "matchDepTypes": [
-        "dependencies",
-        "peerDependencies"
-      ],
-      "groupName": "Dependencies",
-      "matchUpdateTypes": [
-        "major"
-      ]
-    },
-    {
-      "matchDepTypes": [
         "devDependencies"
       ],
       "matchUpdateTypes": [
@@ -378,7 +357,46 @@
       "additionalBranchPrefix": "rhdh ",
       "addLabels": [
         "team/rhdh"
-      ]
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "RHDH Dependencies (non-major)"           
+    },
+    {
+      "matchFileNames": [
+        "plugins/analytics-provider-segment*/**",  
+        "plugins/audit-log*/**",      
+        "plugins/bulk-import*/**",    
+        "plugins/dynamic-plugins-info*/**",
+        "plugins/keycloak*/**",
+        "plugins/ocm*/**",
+        "plugins/quay-actions*/**",
+        "plugins/rbac*/**",
+        "plugins/regex-actions*/**",
+        "plugins/scaffolder-annotator-action*/**",  
+        "plugins/shared-react*/**",                
+        "plugins/topology*/**",
+        "packages/**",
+        "package.json" 
+      ],
+      "additionalBranchPrefix": "rhdh ",
+      "addLabels": [
+        "team/rhdh"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "RHDH Dependencies "           
     },
     {
       "matchFileNames": [
@@ -396,8 +414,75 @@
       "additionalBranchPrefix": "community ",
       "addLabels": [
         "team/community"
-      ]
-    }
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Community Dependencies (non-major)"          
+    },    
+    {
+      "matchFileNames": [
+        "plugins/3scale-backend*/**",
+        "plugins/aap-backend*/**",
+        "plugins/acr*/**",
+        "plugins/jfrog-artifactory*/**",
+        "plugins/kubernetes-actions*/**",
+        "plugins/nexus-repository-manager*/**",
+        "plugins/openshift-image-registry*/**",
+        "plugins/servicenow-actions*/**",
+        "plugins/sonarqube-actions*/**", 
+        "plugins/web-terminal*/**"
+      ],
+      "additionalBranchPrefix": "community ",
+      "addLabels": [
+        "team/community"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Community Dependencies "          
+    },
+    {
+      "extends": "monorepo:material-ui",
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "material-ui (non-major)",        
+      "automerge": true
+    },
+    {
+      "extends": "monorepo:material-ui",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "material-ui"      
+    },
+    {
+      "extends": "monorepo:react",
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "react (non-major)",
+      "automerge": true
+    },
+    {
+      "extends": "monorepo:react",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "react"
+    }                    
   ],
   "ignorePaths": [
     "**/dist-dynamic/**"
