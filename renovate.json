@@ -557,8 +557,9 @@
       "groupName": "types "
     },
     {
-      "matchPackagePrefixes": [
-        "@scalprum/"
+      "description": "Scalprum monorepo",
+      "matchSourceUrls": [
+        "https://github.com/scalprum/scaffolding"
       ],
       "groupName": "Scalprum "
     }
