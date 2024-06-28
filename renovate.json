@@ -3,7 +3,6 @@
     "config:best-practices",
     ":gitSignOff",
     ":rebaseStalePrs",
-    "group:linters",
     ":preserveSemverRanges",
     ":pinOnlyDevDependencies",
     "helpers:pinGitHubActionDigests"
@@ -558,25 +557,13 @@
       "groupName": "types "
     },
     {
-      "matchSourceUrls": [
-        "https://github.com/scalprum/scaffolding"
+      "matchPackagePrefixes": [
+        "@scalprum/"
       ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "groupName": "Scaffolding (non-major)"   
-    },
-    {
-      "matchSourceUrls": [
-        "https://github.com/scalprum/scaffolding"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "Scaffolding "   
-    }    
+      "groupName": "Scalprum "
+    }
   ],
+  "separateMajorMinor": true,
   "ignorePaths": [
     "**/dist-dynamic/**"
   ],
