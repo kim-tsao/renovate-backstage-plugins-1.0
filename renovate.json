@@ -17,7 +17,9 @@
   "npm": {
     "minimumReleaseAge": "1 day"
   },
-  "dependencyDashboardApproval": true,
+  "major": {
+    "dependencyDashboardApproval": true
+  },
   "packageRules": [
     {
       "description": "Do automerge and pin actions in GH workflows, except for versions starting with 0",
@@ -203,7 +205,7 @@
         "dependencies",
         "peerDependencies"
       ],
-      "groupName": "Orchestrator Dependencies (major)",
+      "groupName": "Orchestrator Dependencies",
       "matchUpdateTypes": [
         "major"
       ]
@@ -215,7 +217,51 @@
       "additionalBranchPrefix": "notifications ",
       "addLabels": [
         "team/notifications"
-      ]
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Notifications Dependencies  (non-major)"
+    },
+    {
+      "matchFileNames": [
+        "plugins/notifications*/**"
+      ],
+      "additionalBranchPrefix": "notifications",
+      "addLabels": [
+        "team/notifications"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+       "groupName": "Notifications Dependencies"
+    },    
+    {
+      "matchFileNames": [
+        "plugins/kiali*/**"
+      ],
+      "additionalBranchPrefix": "kiali ",
+      "addLabels": [
+        "team/kiali"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Kiali Dependencies  (non-major)"
     },
     {
       "matchFileNames": [
@@ -224,7 +270,35 @@
       "additionalBranchPrefix": "kiali ",
       "addLabels": [
         "team/kiali"
-      ]
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Kiali Dependencies "
+    },    
+    {
+      "matchFileNames": [
+        "plugins/*matomo*/**",
+        "plugins/analytics-module-matomo*/**",
+        "plugins/feedback*/**"
+      ],
+      "additionalBranchPrefix": "devex ",
+      "addLabels": [
+        "team/devex"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Devex Dependencies (non-major)"     
     },
     {
       "matchFileNames": [
@@ -235,7 +309,35 @@
       "additionalBranchPrefix": "devex ",
       "addLabels": [
         "team/devex"
-      ]
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "Devex Dependencies "     
+    },    
+    {
+      "matchFileNames": [
+        "plugins/quay*/**",
+        "plugins/tekton*/**",
+        "plugins/argocd*/**"        
+      ],
+      "additionalBranchPrefix": "rhtap ",
+      "addLabels": [
+        "team/rhtap"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "RHTAP Dependencies (non-major) "          
     },
     {
       "matchFileNames": [
@@ -246,8 +348,16 @@
       "additionalBranchPrefix": "rhtap ",
       "addLabels": [
         "team/rhtap"
-      ]
-    },
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "peerDependencies"
+      ],
+      "groupName": "RHTAP Dependencies "          
+    },    
     {
       "matchFileNames": [
         "plugins/analytics-provider-segment*/**",  
