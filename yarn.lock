@@ -9075,6 +9075,16 @@
     uuid "^8.3.2"
     yup "^0.32.11"
 
+"@openshift/dynamic-plugin-sdk@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@openshift/dynamic-plugin-sdk/-/dynamic-plugin-sdk-5.0.1.tgz#3487afe57d07a28b9aba393e643d86ca13a3735c"
+  integrity sha512-+azUBN6FgcDmlcWMzG0bthcRUJC1u12wf9xa2aJGFbC/uTiOXwjrkcQ7LW/PyK5Em7wDhwaUdapaeOgh8I6Kjg==
+  dependencies:
+    lodash "^4.17.21"
+    semver "^7.3.7"
+    uuid "^8.3.2"
+    yup "^0.32.11"
+
 "@opentelemetry/api@^1.0.1", "@opentelemetry/api@^1.3.0":
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.6.0.tgz#de2c6823203d6f319511898bb5de7e70f5267e19"
@@ -10075,6 +10085,14 @@
   dependencies:
     "@openshift/dynamic-plugin-sdk" "^4.0.0"
 
+"@scalprum/core@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@scalprum/core/-/core-0.7.0.tgz#9775a9c87a6afafbd9a0bb41c6d22df0a6524e2c"
+  integrity sha512-zvrPXexI+bxHGFY/teuwPI5yjnOuiq8uT+RDsrm3gnpr1AqZQVUiGdskl1ON/ci5lSs1kNadmXceF1BTKlicwg==
+  dependencies:
+    "@openshift/dynamic-plugin-sdk" "^5.0.1"
+    tslib "^2.6.2"
+
 "@scalprum/react-core@^0.6.1":
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/@scalprum/react-core/-/react-core-0.6.1.tgz#595a59964be16c5e13508e16c50530a4dedbd006"
@@ -10082,6 +10100,15 @@
   dependencies:
     "@openshift/dynamic-plugin-sdk" "^4.0.0"
     "@scalprum/core" "^0.6.1"
+    lodash "^4.17.0"
+
+"@scalprum/react-core@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@scalprum/react-core/-/react-core-0.8.0.tgz#34bdec81af62fa4f87741169b2721729b3dd69ee"
+  integrity sha512-ADqL6GdjT0ihVfTtIqu8vvYgwUb3IiUGXj9md1+h6tL8yshbq+FAezwuD9jhX7qcjfgL1Sl3g/faO2/SE9jPvw==
+  dependencies:
+    "@openshift/dynamic-plugin-sdk" "^5.0.1"
+    "@scalprum/core" "^0.7.0"
     lodash "^4.17.0"
 
 "@scalprum/react-test-utils@0.0.4":
