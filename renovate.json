@@ -487,8 +487,7 @@
       "groupName": "material-ui (non-major)",
       "addLabels": [
         "team/rhdh"
-      ],
-      "automerge": true
+      ]
     },
     {
       "extends": [
