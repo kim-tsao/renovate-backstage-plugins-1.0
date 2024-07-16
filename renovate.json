@@ -487,8 +487,7 @@
       "groupName": "material-ui (non-major)",
       "addLabels": [
         "team/rhdh"
-      ],
-      "automerge": true
+      ]
     },
     {
       "extends": [
@@ -526,32 +525,7 @@
       "addLabels": [
         "team/rhdh"
       ]
-    },
-    {
-      "extends": [
-        "monorepo:babel"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "groupName": "babel {{depTypes}} (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]   
-    },
-    {
-      "extends": [
-        "monorepo:babel"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "babel {{depTypes}} (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]   
-    },    
+    }, 
     {
       "extends": [
         "packages:linters"
