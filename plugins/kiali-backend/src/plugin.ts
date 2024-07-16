@@ -1,4 +1,3 @@
-import { loggerToWinstonLogger } from '@backstage/backend-common';
 import {
   coreServices,
   createBackendPlugin,
@@ -22,12 +21,15 @@ export const kialiPlugin = createBackendPlugin({
         catalogApi: catalogServiceRef,
       },
       async init({ http, logger, config }) {
-        const winstonLogger = loggerToWinstonLogger(logger);
-        const router = await createRouter({
-          logger: winstonLogger,
-          config,
+        http.use(await createRouter({ logger, config }));
+        http.addAuthPolicy({
+          path: '/status',
+          allow: 'unauthenticated',
         });
-        http.use(router);
+        http.addAuthPolicy({
+          path: '/proxy',
+          allow: 'unauthenticated',
+        });
       },
     });
   },

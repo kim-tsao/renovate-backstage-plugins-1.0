@@ -24,6 +24,7 @@ const useStyles = makeStyles(theme => ({
 
 type PermissionsCardProps = {
   entityReference: string;
+  canReadUsersAndGroups: boolean;
 };
 
 const getRefreshIcon = () => <CachedIcon />;
@@ -40,7 +41,10 @@ const getEditIcon = (isAllowed: boolean, roleName: string) => {
   );
 };
 
-export const PermissionsCard = ({ entityReference }: PermissionsCardProps) => {
+export const PermissionsCard = ({
+  entityReference,
+  canReadUsersAndGroups,
+}: PermissionsCardProps) => {
   const { data, loading, retry, error } =
     usePermissionPolicies(entityReference);
   const [permissions, setPermissions] = React.useState<PermissionsData[]>();
@@ -56,6 +60,10 @@ export const PermissionsCard = ({ entityReference }: PermissionsCardProps) => {
 
   let numberOfPolicies = 0;
   (permissions || data)?.forEach(p => {
+    if (p.conditions) {
+      numberOfPolicies++;
+      return;
+    }
     numberOfPolicies =
       numberOfPolicies +
       p.policies.filter(pol => pol.effect === 'allow').length;
@@ -68,11 +76,19 @@ export const PermissionsCard = ({ entityReference }: PermissionsCardProps) => {
       onClick: () => {
         retry.permissionPoliciesRetry();
         retry.policiesRetry();
+        retry.conditionalPoliciesRetry();
       },
     },
     {
-      icon: () => getEditIcon(permissionResult.allowed, entityReference),
-      tooltip: !permissionResult.allowed ? 'Unauthorized to edit' : 'Edit',
+      icon: () =>
+        getEditIcon(
+          permissionResult.allowed && canReadUsersAndGroups,
+          entityReference,
+        ),
+      tooltip:
+        permissionResult.allowed && canReadUsersAndGroups
+          ? 'Edit'
+          : 'Unauthorized to edit',
       isFreeAction: true,
       onClick: () => {},
     },
@@ -81,7 +97,7 @@ export const PermissionsCard = ({ entityReference }: PermissionsCardProps) => {
   return (
     <Card>
       <CardContent>
-        {error?.name && (
+        {error?.name && error.name !== 404 && (
           <div style={{ paddingBottom: '16px' }}>
             <WarningPanel
               message={error?.message}
@@ -92,14 +108,14 @@ export const PermissionsCard = ({ entityReference }: PermissionsCardProps) => {
         )}
         <Table
           title={
-            !loading && data?.length
+            !loading && data.length > 0
               ? `Permission Policies (${numberOfPolicies})`
               : 'Permission Policies'
           }
           actions={actions}
           renderSummaryRow={summary => onSearchResultsChange(summary.data)}
           options={{ padding: 'default', search: true, paging: true }}
-          data={data ?? []}
+          data={data}
           columns={columns}
           isLoading={loading}
           emptyContent={

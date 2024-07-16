@@ -1,35 +1,38 @@
-import { PermissionPolicy } from '@janus-idp/backstage-plugin-rbac-common';
+import { PluginPermissionMetaData } from '@janus-idp/backstage-plugin-rbac-common';
 
-export const mockPermissionPolicies: PermissionPolicy[] = [
+export const mockPermissionPolicies: PluginPermissionMetaData[] = [
   {
     pluginId: 'catalog',
     policies: [
       {
-        permission: 'catalog-entity',
+        resourceType: 'catalog-entity',
+        name: 'catalog.entity.read',
         policy: 'read',
       },
       {
-        permission: 'catalog.entity.create',
+        name: 'catalog.entity.create',
         policy: 'create',
       },
       {
-        permission: 'catalog-entity',
+        resourceType: 'catalog-entity',
+        name: 'catalog.entity.delete',
         policy: 'delete',
       },
       {
-        permission: 'catalog-entity',
+        resourceType: 'catalog-entity',
+        name: 'catalog.entity.update',
         policy: 'update',
       },
       {
-        permission: 'catalog.location.read',
+        name: 'catalog.location.read',
         policy: 'read',
       },
       {
-        permission: 'catalog.location.create',
+        name: 'catalog.location.create',
         policy: 'create',
       },
       {
-        permission: 'catalog.location.delete',
+        name: 'catalog.location.delete',
         policy: 'delete',
       },
     ],
@@ -38,15 +41,18 @@ export const mockPermissionPolicies: PermissionPolicy[] = [
     pluginId: 'scaffolder',
     policies: [
       {
-        permission: 'scaffolder-template',
+        resourceType: 'scaffolder-template',
+        name: 'scaffolder.template.read',
         policy: 'read',
       },
       {
-        permission: 'scaffolder-template',
+        resourceType: 'scaffolder-template',
+        name: 'scaffolder.template.read',
         policy: 'read',
       },
       {
-        permission: 'scaffolder-action',
+        resourceType: 'scaffolder-action',
+        name: 'scaffolder.action.use',
         policy: 'use',
       },
     ],
@@ -55,19 +61,19 @@ export const mockPermissionPolicies: PermissionPolicy[] = [
     pluginId: 'permission',
     policies: [
       {
-        permission: 'policy-entity',
+        name: 'policy-entity',
         policy: 'read',
       },
       {
-        permission: 'policy-entity',
+        name: 'policy-entity',
         policy: 'create',
       },
       {
-        permission: 'policy-entity',
+        name: 'policy-entity',
         policy: 'delete',
       },
       {
-        permission: 'policy-entity',
+        name: 'policy-entity',
         policy: 'update',
       },
     ],

@@ -1,8 +1,6 @@
-import { DatabaseService } from '@backstage/backend-plugin-api';
 import { ConfigReader } from '@backstage/config';
 
-import * as Knex from 'knex';
-import { MockClient } from 'knex-mock-client';
+import knex, { Knex } from 'knex';
 import TypeORMAdapter from 'typeorm-adapter';
 
 import { CasbinDBAdapterFactory } from './casbin-adapter-factory';
@@ -17,6 +15,7 @@ jest.mock('typeorm-adapter', () => {
 
 describe('CasbinAdapterFactory', () => {
   let newAdapterMock: jest.Mock<Promise<TypeORMAdapter>>;
+  let db: Knex;
 
   beforeEach(() => {
     newAdapterMock = TypeORMAdapter.newAdapter as jest.Mock<
@@ -25,9 +24,10 @@ describe('CasbinAdapterFactory', () => {
     jest.clearAllMocks();
   });
   it('test building an adapter using a better-sqlite3 configuration.', async () => {
-    const mockDatabaseManager = {
-      getClient: jest.fn().mockImplementation(),
-    };
+    db = knex.knex({
+      client: 'better-sqlite3',
+      connection: ':memory',
+    });
     const config = new ConfigReader({
       backend: {
         database: {
@@ -36,34 +36,20 @@ describe('CasbinAdapterFactory', () => {
         },
       },
     });
-    const adapterFactory = new CasbinDBAdapterFactory(
-      config,
-      mockDatabaseManager,
-    );
+    const adapterFactory = new CasbinDBAdapterFactory(config, db);
     const adapter = adapterFactory.createAdapter();
     expect(adapter).not.toBeNull();
     expect(newAdapterMock).toHaveBeenCalled();
   });
 
   describe('build adapter with postgres configuration', () => {
-    let mockDatabaseManager: DatabaseService;
-
     beforeEach(() => {
-      const db = Knex.knex({ client: MockClient as unknown as undefined });
-      db.client = {
-        config: {
-          connection: {
-            database: 'test-database',
-          },
+      db = knex.knex({
+        client: 'pg',
+        connection: {
+          database: 'test-database',
         },
-      };
-      mockDatabaseManager = {
-        getClient: jest
-          .fn()
-          .mockImplementation(async (): Promise<Knex.Knex> => {
-            return db;
-          }),
-      };
+      });
       process.env.TEST = 'test';
     });
 
@@ -75,19 +61,21 @@ describe('CasbinAdapterFactory', () => {
             connection: {
               host: 'localhost',
               port: '5432',
+              schema: 'public',
               user: 'postgresUser',
               password: process.env.TEST,
             },
           },
         },
       });
-      const factory = new CasbinDBAdapterFactory(config, mockDatabaseManager);
+      const factory = new CasbinDBAdapterFactory(config, db);
       const adapter = await factory.createAdapter();
       expect(adapter).not.toBeNull();
       expect(newAdapterMock).toHaveBeenCalledWith({
         type: 'postgres',
         host: 'localhost',
         port: 5432,
+        schema: 'public',
         username: 'postgresUser',
         password: process.env.TEST,
         database: 'test-database',
@@ -103,6 +91,7 @@ describe('CasbinAdapterFactory', () => {
             connection: {
               host: 'localhost',
               port: '5432',
+              schema: 'public',
               user: 'postgresUser',
               password: process.env.TEST,
               ssl: true,
@@ -110,13 +99,14 @@ describe('CasbinAdapterFactory', () => {
           },
         },
       });
-      const factory = new CasbinDBAdapterFactory(config, mockDatabaseManager);
+      const factory = new CasbinDBAdapterFactory(config, db);
       const adapter = await factory.createAdapter();
       expect(adapter).not.toBeNull();
       expect(newAdapterMock).toHaveBeenCalledWith({
         type: 'postgres',
         host: 'localhost',
         port: 5432,
+        schema: 'public',
         username: 'postgresUser',
         password: process.env.TEST,
         database: 'test-database',
@@ -132,6 +122,7 @@ describe('CasbinAdapterFactory', () => {
             connection: {
               host: 'localhost',
               port: '5432',
+              schema: 'public',
               user: 'postgresUser',
               password: process.env.TEST,
               ssl: false,
@@ -139,13 +130,14 @@ describe('CasbinAdapterFactory', () => {
           },
         },
       });
-      const factory = new CasbinDBAdapterFactory(config, mockDatabaseManager);
+      const factory = new CasbinDBAdapterFactory(config, db);
       const adapter = await factory.createAdapter();
       expect(adapter).not.toBeNull();
       expect(newAdapterMock).toHaveBeenCalledWith({
         type: 'postgres',
         host: 'localhost',
         port: 5432,
+        schema: 'public',
         username: 'postgresUser',
         password: process.env.TEST,
         database: 'test-database',
@@ -161,6 +153,7 @@ describe('CasbinAdapterFactory', () => {
             connection: {
               host: 'localhost',
               port: '5432',
+              schema: 'public',
               user: 'postgresUser',
               password: process.env.TEST,
               ssl: {
@@ -170,13 +163,14 @@ describe('CasbinAdapterFactory', () => {
           },
         },
       });
-      const factory = new CasbinDBAdapterFactory(config, mockDatabaseManager);
+      const factory = new CasbinDBAdapterFactory(config, db);
       const adapter = await factory.createAdapter();
       expect(adapter).not.toBeNull();
       expect(newAdapterMock).toHaveBeenCalledWith({
         type: 'postgres',
         host: 'localhost',
         port: 5432,
+        schema: 'public',
         username: 'postgresUser',
         password: process.env.TEST,
         database: 'test-database',
@@ -190,9 +184,6 @@ describe('CasbinAdapterFactory', () => {
   it('ensure that building an adapter with an unknown configuration fails.', async () => {
     const client = 'unknown-db';
     const expectedError = new Error(`Unsupported database client ${client}`);
-    const mockDatabaseManager = {
-      getClient: jest.fn().mockImplementation(),
-    };
     const config = new ConfigReader({
       backend: {
         database: {
@@ -200,10 +191,7 @@ describe('CasbinAdapterFactory', () => {
         },
       },
     });
-    const adapterFactory = new CasbinDBAdapterFactory(
-      config,
-      mockDatabaseManager,
-    );
+    const adapterFactory = new CasbinDBAdapterFactory(config, db);
 
     await expect(adapterFactory.createAdapter()).rejects.toStrictEqual(
       expectedError,

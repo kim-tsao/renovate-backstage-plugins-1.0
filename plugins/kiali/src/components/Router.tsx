@@ -33,6 +33,7 @@ import {
   workloadsRouteRef,
 } from '../routes';
 import { KialiProvider } from '../store/KialiProvider';
+import { TechPreviewWarning } from './Banners/TechPreviewWarning';
 
 export const KUBERNETES_ANNOTATION = 'backstage.io/kubernetes-id';
 export const KUBERNETES_NAMESPACE = 'backstage.io/kubernetes-namespace';
@@ -87,6 +88,7 @@ export const EmbeddedRouter = () => {
   ) : (
     <KialiProvider entity={entity}>
       <KialiHeaderEntity />
+      <TechPreviewWarning />
       {getEntityRoutes()}
     </KialiProvider>
   );
@@ -162,7 +164,10 @@ export const Router = () => {
       <Page themeId="tool">
         <KialiHeader />
         <KialiTabs />
-        <Content>{getRoutes()}</Content>
+        <Content>
+          <TechPreviewWarning />
+          {getRoutes()}
+        </Content>
       </Page>
     </KialiProvider>
   );

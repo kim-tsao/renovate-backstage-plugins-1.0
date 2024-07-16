@@ -1,4 +1,5 @@
 import { getVoidLogger, ReadUrlResponse } from '@backstage/backend-common';
+import { mockServices } from '@backstage/backend-test-utils';
 import { ConfigReader } from '@backstage/config';
 import { NotFoundError } from '@backstage/errors';
 
@@ -25,6 +26,8 @@ const mockUrlReaderService = {
   }),
 };
 
+const mockAuth = mockServices.auth();
+
 jest.mock('@backstage/backend-common', () => {
   const actualBackendCommon = jest.requireActual('@backstage/backend-common');
   actualBackendCommon.UrlReaders = {
@@ -34,7 +37,6 @@ jest.mock('@backstage/backend-common', () => {
 });
 
 describe('plugin-endpoint', () => {
-  const fakeToken = 'fakeToken';
   const mockPluginEndpointDiscovery = {
     getBaseUrl: jest.fn().mockImplementation(async (pluginId: string) => {
       return `https://localhost:7007/api/${pluginId}`;
@@ -64,7 +66,7 @@ describe('plugin-endpoint', () => {
         logger,
         config,
       );
-      const policiesMetadata = await collector.getPluginPolicies(fakeToken);
+      const policiesMetadata = await collector.getPluginPolicies(mockAuth);
 
       expect(policiesMetadata.length).toEqual(0);
     });
@@ -83,14 +85,14 @@ describe('plugin-endpoint', () => {
         logger,
         config,
       );
-      const policiesMetadata = await collector.getPluginPolicies(fakeToken);
+      const policiesMetadata = await collector.getPluginPolicies(mockAuth);
 
       expect(policiesMetadata.length).toEqual(1);
       expect(policiesMetadata[0].pluginId).toEqual('permission');
       expect(policiesMetadata[0].policies).toEqual([
         {
-          isResourced: true,
-          permission: 'policy-entity',
+          name: 'policy.entity.read',
+          resourceType: 'policy-entity',
           policy: 'read',
         },
       ]);
@@ -110,14 +112,13 @@ describe('plugin-endpoint', () => {
         logger,
         config,
       );
-      const policiesMetadata = await collector.getPluginPolicies(fakeToken);
+      const policiesMetadata = await collector.getPluginPolicies(mockAuth);
 
       expect(policiesMetadata.length).toEqual(1);
       expect(policiesMetadata[0].pluginId).toEqual('permission');
       expect(policiesMetadata[0].policies).toEqual([
         {
-          isResourced: false,
-          permission: 'catalog.entity.create',
+          name: 'catalog.entity.create',
           policy: 'create',
         },
       ]);
@@ -150,14 +151,14 @@ describe('plugin-endpoint', () => {
         logger,
         config,
       );
-      const policiesMetadata = await collector.getPluginPolicies(fakeToken);
+      const policiesMetadata = await collector.getPluginPolicies(mockAuth);
 
       expect(policiesMetadata.length).toEqual(1);
       expect(policiesMetadata[0].pluginId).toEqual('permission');
       expect(policiesMetadata[0].policies).toEqual([
         {
-          isResourced: true,
-          permission: 'policy-entity',
+          name: 'policy.entity.read',
+          resourceType: 'policy-entity',
           policy: 'read',
         },
       ]);
@@ -192,14 +193,14 @@ describe('plugin-endpoint', () => {
         config,
       );
 
-      const policiesMetadata = await collector.getPluginPolicies(fakeToken);
+      const policiesMetadata = await collector.getPluginPolicies(mockAuth);
 
       expect(policiesMetadata.length).toEqual(1);
       expect(policiesMetadata[0].pluginId).toEqual('permission');
       expect(policiesMetadata[0].policies).toEqual([
         {
-          isResourced: true,
-          permission: 'policy-entity',
+          name: 'policy.entity.read',
+          resourceType: 'policy-entity',
           policy: 'read',
         },
       ]);
@@ -234,14 +235,14 @@ describe('plugin-endpoint', () => {
         logger,
         config,
       );
-      const policiesMetadata = await collector.getPluginPolicies(fakeToken);
+      const policiesMetadata = await collector.getPluginPolicies(mockAuth);
 
       expect(policiesMetadata.length).toEqual(1);
       expect(policiesMetadata[0].pluginId).toEqual('permission');
       expect(policiesMetadata[0].policies).toEqual([
         {
-          isResourced: true,
-          permission: 'policy-entity',
+          name: 'policy.entity.read',
+          resourceType: 'policy-entity',
           policy: 'read',
         },
       ]);
@@ -262,7 +263,7 @@ describe('plugin-endpoint', () => {
         config,
       );
       const conditionRulesMetadata =
-        await collector.getPluginConditionRules(fakeToken);
+        await collector.getPluginConditionRules(mockAuth);
 
       expect(conditionRulesMetadata.length).toEqual(0);
     });
@@ -282,7 +283,7 @@ describe('plugin-endpoint', () => {
         config,
       );
       const conditionRulesMetadata =
-        await collector.getPluginConditionRules(fakeToken);
+        await collector.getPluginConditionRules(mockAuth);
 
       expect(conditionRulesMetadata.length).toEqual(1);
       expect(conditionRulesMetadata[0].pluginId).toEqual('catalog');

@@ -4,7 +4,11 @@ import {
   ReaderFactory,
   UrlReaders,
 } from '@backstage/backend-common';
-import { UrlReaderService } from '@backstage/backend-plugin-api';
+import {
+  AuthService,
+  LoggerService,
+  UrlReaderService,
+} from '@backstage/backend-plugin-api';
 import { Config } from '@backstage/config';
 import { isError } from '@backstage/errors';
 import {
@@ -16,9 +20,10 @@ import {
   MetadataResponseSerializedRule,
 } from '@backstage/plugin-permission-node';
 
-import { Logger } from 'winston';
-
-import { Policy } from '@janus-idp/backstage-plugin-rbac-common';
+import {
+  PluginPermissionMetaData,
+  PolicyDetails,
+} from '@janus-idp/backstage-plugin-rbac-common';
 import { PluginIdProvider } from '@janus-idp/backstage-plugin-rbac-node';
 
 type PluginMetadataResponse = {
@@ -31,11 +36,6 @@ export type PluginMetadataResponseSerializedRule = {
   rules: MetadataResponseSerializedRule[];
 };
 
-export type PluginPermissionMetaData = {
-  pluginId: string;
-  policies: Policy[];
-};
-
 export class PluginPermissionMetadataCollector {
   private readonly pluginIds: string[];
   private urlReader: UrlReaderService;
@@ -43,7 +43,7 @@ export class PluginPermissionMetadataCollector {
   constructor(
     private readonly discovery: PluginEndpointDiscovery,
     private readonly pluginIdProvider: PluginIdProvider,
-    private readonly logger: Logger,
+    private readonly logger: LoggerService,
     config: Config,
   ) {
     this.pluginIds = this.pluginIdProvider.getPluginIds();
@@ -55,9 +55,9 @@ export class PluginPermissionMetadataCollector {
   }
 
   async getPluginConditionRules(
-    token: string | undefined,
+    auth: AuthService,
   ): Promise<PluginMetadataResponseSerializedRule[]> {
-    const pluginMetadata = await this.getPluginMetaData(token);
+    const pluginMetadata = await this.getPluginMetaData(auth);
 
     return pluginMetadata
       .filter(metadata => metadata.metaDataResponse.rules.length > 0)
@@ -70,9 +70,9 @@ export class PluginPermissionMetadataCollector {
   }
 
   async getPluginPolicies(
-    token: string | undefined,
+    auth: AuthService,
   ): Promise<PluginPermissionMetaData[]> {
-    const pluginMetadata = await this.getPluginMetaData(token);
+    const pluginMetadata = await this.getPluginMetaData(auth);
 
     return pluginMetadata
       .filter(metadata => metadata.metaDataResponse.permissions !== undefined)
@@ -91,11 +91,15 @@ export class PluginPermissionMetadataCollector {
   };
 
   private async getPluginMetaData(
-    token: string | undefined,
+    auth: AuthService,
   ): Promise<PluginMetadataResponse[]> {
     let pluginResponses: PluginMetadataResponse[] = [];
 
     for (const pluginId of this.pluginIds) {
+      const { token } = await auth.getPluginRequestToken({
+        onBehalfOf: await auth.getOwnServiceCredentials(),
+        targetPluginId: pluginId,
+      });
       const permMetaData = await this.getMetadataByPluginId(pluginId, token);
       if (permMetaData) {
         pluginResponses = [
@@ -141,20 +145,21 @@ export class PluginPermissionMetadataCollector {
   }
 }
 
-function permissionsToCasbinPolicies(permissions: Permission[]): Policy[] {
-  const policies: Policy[] = [];
+function permissionsToCasbinPolicies(
+  permissions: Permission[],
+): PolicyDetails[] {
+  const policies: PolicyDetails[] = [];
   for (const permission of permissions) {
     if (isResourcePermission(permission)) {
       policies.push({
-        permission: permission.resourceType,
+        resourceType: permission.resourceType,
+        name: permission.name,
         policy: permission.attributes.action || 'use',
-        isResourced: true,
       });
     } else {
       policies.push({
-        permission: permission.name,
+        name: permission.name,
         policy: permission.attributes.action || 'use',
-        isResourced: false,
       });
     }
   }

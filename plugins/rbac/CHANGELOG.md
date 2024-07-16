@@ -1,3 +1,207 @@
+## @janus-idp/backstage-plugin-rbac [1.23.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.23.0...@janus-idp/backstage-plugin-rbac@1.23.1) (2024-07-11)
+
+
+### Other changes
+
+* **rbac:** reduce cognitive stress for create, update and delete role functions ([#1878](https://github.com/janus-idp/backstage-plugins/issues/1878)) ([38c3144](https://github.com/janus-idp/backstage-plugins/commit/38c314450b01ebe71463362685242956483fef3d))
+
+## @janus-idp/backstage-plugin-rbac [1.23.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.22.1...@janus-idp/backstage-plugin-rbac@1.23.0) (2024-07-08)
+
+
+### Features
+
+* **rbac:** show rules count in overview page ([#1845](https://github.com/janus-idp/backstage-plugins/issues/1845)) ([a10dc36](https://github.com/janus-idp/backstage-plugins/commit/a10dc368cd4e0dc28d1a99dec6d06a5f578f49db))
+
+## @janus-idp/backstage-plugin-rbac [1.22.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.22.0...@janus-idp/backstage-plugin-rbac@1.22.1) (2024-07-05)
+
+
+### Bug Fixes
+
+* **rbac:** correct plugin ID matching to permission policy ([#1795](https://github.com/janus-idp/backstage-plugins/issues/1795)) ([6dc4b1c](https://github.com/janus-idp/backstage-plugins/commit/6dc4b1c23d22252f394eecd8b795ac15507ecc50))
+* **rbac:** edit role page loads error page ([#1849](https://github.com/janus-idp/backstage-plugins/issues/1849)) ([6782b4b](https://github.com/janus-idp/backstage-plugins/commit/6782b4bda08019c6f81b211486ff47ba1fb2d6bf))
+* **rbac:** update rbac common to fix compilation ([#1858](https://github.com/janus-idp/backstage-plugins/issues/1858)) ([48f142b](https://github.com/janus-idp/backstage-plugins/commit/48f142b447f0d1677ba3f16b2a3c8972b22d0588))
+
+## @janus-idp/backstage-plugin-rbac [1.22.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.21.1...@janus-idp/backstage-plugin-rbac@1.22.0) (2024-06-21)
+
+
+### Features
+
+* **rbac:** show total no. of rules in review and create step ([#1827](https://github.com/janus-idp/backstage-plugins/issues/1827)) ([e54c470](https://github.com/janus-idp/backstage-plugins/commit/e54c4705de0b318a759e928999b5dcdb29f9846f))
+
+## @janus-idp/backstage-plugin-rbac [1.21.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.21.0...@janus-idp/backstage-plugin-rbac@1.21.1) (2024-06-19)
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.7.1
+* **@janus-idp/cli:** upgraded to 1.11.1
+
+## @janus-idp/backstage-plugin-rbac [1.21.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.15...@janus-idp/backstage-plugin-rbac@1.21.0) (2024-06-13)
+
+
+### Features
+
+* **deps:** update to backstage 1.27 ([#1683](https://github.com/janus-idp/backstage-plugins/issues/1683)) ([a14869c](https://github.com/janus-idp/backstage-plugins/commit/a14869c3f4177049cb8d6552b36c3ffd17e7997d))
+
+
+
+### Dependencies
+
+* **@janus-idp/backstage-plugin-rbac-common:** upgraded to 1.6.0
+* **@janus-idp/shared-react:** upgraded to 2.7.0
+* **@janus-idp/cli:** upgraded to 1.11.0
+
+## @janus-idp/backstage-plugin-rbac [1.20.15](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.14...@janus-idp/backstage-plugin-rbac@1.20.15) (2024-06-13)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.10.1
+
+## @janus-idp/backstage-plugin-rbac [1.20.14](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.13...@janus-idp/backstage-plugin-rbac@1.20.14) (2024-06-05)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.10.0
+
+## @janus-idp/backstage-plugin-rbac [1.20.13](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.12...@janus-idp/backstage-plugin-rbac@1.20.13) (2024-06-04)
+
+
+
+### Dependencies
+
+* **@janus-idp/backstage-plugin-rbac-common:** upgraded to 1.5.0
+* **@janus-idp/shared-react:** upgraded to 2.6.4
+
+## @janus-idp/backstage-plugin-rbac [1.20.12](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.11...@janus-idp/backstage-plugin-rbac@1.20.12) (2024-06-04)
+
+
+### Bug Fixes
+
+* **rbac:** fix role list view permission policies column value ([#1714](https://github.com/janus-idp/backstage-plugins/issues/1714)) ([07200e4](https://github.com/janus-idp/backstage-plugins/commit/07200e42d62c51c2ff59e812521ad0c82cb62ea8))
+
+## @janus-idp/backstage-plugin-rbac [1.20.11](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.10...@janus-idp/backstage-plugin-rbac@1.20.11) (2024-06-03)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.9.0
+
+## @janus-idp/backstage-plugin-rbac [1.20.10](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.9...@janus-idp/backstage-plugin-rbac@1.20.10) (2024-06-03)
+
+
+### Bug Fixes
+
+* **rbac:** add proper empty page for RBAC plugin ([#1728](https://github.com/janus-idp/backstage-plugins/issues/1728)) ([79e62a6](https://github.com/janus-idp/backstage-plugins/commit/79e62a6f120a7390af2e2bdc1e6dc6962c0e3780))
+
+## @janus-idp/backstage-plugin-rbac [1.20.9](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.8...@janus-idp/backstage-plugin-rbac@1.20.9) (2024-05-31)
+
+## @janus-idp/backstage-plugin-rbac [1.20.8](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.7...@janus-idp/backstage-plugin-rbac@1.20.8) (2024-05-31)
+
+
+### Bug Fixes
+
+* **rbac:** improve criteria toggle button readability on dark themes ([#1755](https://github.com/janus-idp/backstage-plugins/issues/1755)) ([345230b](https://github.com/janus-idp/backstage-plugins/commit/345230baa4188ce659b7c48c114fa98b68d41a0c))
+
+## @janus-idp/backstage-plugin-rbac [1.20.7](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.6...@janus-idp/backstage-plugin-rbac@1.20.7) (2024-05-31)
+
+
+### Bug Fixes
+
+* **rbac:** show configure-access cta for existing simple permission policies in edit form ([#1702](https://github.com/janus-idp/backstage-plugins/issues/1702)) ([16b7e00](https://github.com/janus-idp/backstage-plugins/commit/16b7e00646153dffd9919f32e57853dbcbd2facb))
+
+## @janus-idp/backstage-plugin-rbac [1.20.6](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.5...@janus-idp/backstage-plugin-rbac@1.20.6) (2024-05-30)
+
+
+### Bug Fixes
+
+* **rbac:** fix to enable create and edit role buttons on having correct permissions ([#1703](https://github.com/janus-idp/backstage-plugins/issues/1703)) ([19a9088](https://github.com/janus-idp/backstage-plugins/commit/19a908844f48b59116e92091169dd906c45f5621))
+
+## @janus-idp/backstage-plugin-rbac [1.20.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.4...@janus-idp/backstage-plugin-rbac@1.20.5) (2024-05-30)
+
+
+### Bug Fixes
+
+* **rbac:** do not disable already selected rule for allOf/anyOf ([#1739](https://github.com/janus-idp/backstage-plugins/issues/1739)) ([dc73650](https://github.com/janus-idp/backstage-plugins/commit/dc73650587cd13e80923a36473a46e016fae3e81))
+
+## @janus-idp/backstage-plugin-rbac [1.20.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.3...@janus-idp/backstage-plugin-rbac@1.20.4) (2024-05-29)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.8.10
+
+## @janus-idp/backstage-plugin-rbac [1.20.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.2...@janus-idp/backstage-plugin-rbac@1.20.3) (2024-05-29)
+
+
+### Bug Fixes
+
+* **rbac:** conditional access form validation ([#1699](https://github.com/janus-idp/backstage-plugins/issues/1699)) ([d56f4af](https://github.com/janus-idp/backstage-plugins/commit/d56f4affd2538c5b9554e19b6ec2951d98d2b218))
+* **rbac:** enable save on remove-all button click ([#1712](https://github.com/janus-idp/backstage-plugins/issues/1712)) ([0502332](https://github.com/janus-idp/backstage-plugins/commit/0502332409b092ebc860c9a77d8b966ef920f7bf))
+* **rbac:** fix mui autocomplete related warnings ([#1707](https://github.com/janus-idp/backstage-plugins/issues/1707)) ([8e5c5ae](https://github.com/janus-idp/backstage-plugins/commit/8e5c5aef5e0472fdb876d81fc7f2356cfb4319f0))
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.6.3
+* **@janus-idp/cli:** upgraded to 1.8.9
+
+## @janus-idp/backstage-plugin-rbac [1.20.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.1...@janus-idp/backstage-plugin-rbac@1.20.2) (2024-05-16)
+
+## @janus-idp/backstage-plugin-rbac [1.20.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.20.0...@janus-idp/backstage-plugin-rbac@1.20.1) (2024-05-16)
+
+
+
+### Dependencies
+
+* **@janus-idp/shared-react:** upgraded to 2.6.2
+* **@janus-idp/cli:** upgraded to 1.8.7
+
+## @janus-idp/backstage-plugin-rbac [1.20.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.19.0...@janus-idp/backstage-plugin-rbac@1.20.0) (2024-05-15)
+
+
+### Features
+
+* **rbac:** support for updating/deleting conditional permissions ([#1628](https://github.com/janus-idp/backstage-plugins/issues/1628)) ([2bb8308](https://github.com/janus-idp/backstage-plugins/commit/2bb8308d53e539023dd87573a66ad25501ada7d1))
+
+## @janus-idp/backstage-plugin-rbac [1.19.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.18.2...@janus-idp/backstage-plugin-rbac@1.19.0) (2024-05-14)
+
+
+### Features
+
+* **deps:** use RHDH themes in the backstage app and dev pages ([#1480](https://github.com/janus-idp/backstage-plugins/issues/1480)) ([8263bf0](https://github.com/janus-idp/backstage-plugins/commit/8263bf099736cbb0d0f2316082d338ba81fa6927))
+
+## @janus-idp/backstage-plugin-rbac [1.18.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.18.1...@janus-idp/backstage-plugin-rbac@1.18.2) (2024-05-09)
+
+
+
+### Dependencies
+
+* **@janus-idp/backstage-plugin-rbac-common:** upgraded to 1.4.2
+* **@janus-idp/shared-react:** upgraded to 2.6.1
+* **@janus-idp/cli:** upgraded to 1.8.6
+
+## @janus-idp/backstage-plugin-rbac [1.18.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.18.0...@janus-idp/backstage-plugin-rbac@1.18.1) (2024-05-08)
+
+
+### Bug Fixes
+
+* **rbac:** hide frontend when permission framework was disabled ([#1493](https://github.com/janus-idp/backstage-plugins/issues/1493)) ([5aa012f](https://github.com/janus-idp/backstage-plugins/commit/5aa012f0a35c1ee1269c570e4b5c94032f592559))
+
+## @janus-idp/backstage-plugin-rbac [1.18.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.17.11...@janus-idp/backstage-plugin-rbac@1.18.0) (2024-05-08)
+
+
+### Features
+
+* **rbac:** support for adding conditional permissions ([#1588](https://github.com/janus-idp/backstage-plugins/issues/1588)) ([2042244](https://github.com/janus-idp/backstage-plugins/commit/2042244dc31a557d62bfcf6f7eb556c12154430e))
+
 ## @janus-idp/backstage-plugin-rbac [1.17.11](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac@1.17.10...@janus-idp/backstage-plugin-rbac@1.17.11) (2024-05-02)
 
 

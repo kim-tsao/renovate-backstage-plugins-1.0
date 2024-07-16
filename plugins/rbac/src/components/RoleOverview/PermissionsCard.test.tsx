@@ -3,6 +3,7 @@ import React from 'react';
 import { usePermission } from '@backstage/plugin-permission-react';
 import { renderInTestApp } from '@backstage/test-utils';
 
+import { mockFormInitialValues } from '../../__fixtures__/mockFormValues';
 import { usePermissionPolicies } from '../../hooks/usePermissionPolicies';
 import { PermissionsData } from '../../types';
 import { PermissionsCard } from './PermissionsCard';
@@ -50,11 +51,18 @@ describe('PermissionsCard', () => {
     mockPermissionPolicies.mockReturnValue({
       loading: false,
       data: usePermissionPoliciesMockData,
-      retry: { policiesRetry: jest.fn(), permissionPoliciesRetry: jest.fn() },
+      retry: {
+        policiesRetry: jest.fn(),
+        permissionPoliciesRetry: jest.fn(),
+        conditionalPoliciesRetry: jest.fn(),
+      },
       error: new Error(''),
     });
     const { queryByText } = await renderInTestApp(
-      <PermissionsCard entityReference="user:default/debsmita1" />,
+      <PermissionsCard
+        entityReference="user:default/debsmita1"
+        canReadUsersAndGroups
+      />,
     );
     expect(queryByText('Permission Policies (3)')).not.toBeNull();
     expect(queryByText('Read, Create, Delete')).not.toBeNull();
@@ -65,11 +73,18 @@ describe('PermissionsCard', () => {
     mockPermissionPolicies.mockReturnValue({
       loading: false,
       data: [],
-      retry: { policiesRetry: jest.fn(), permissionPoliciesRetry: jest.fn() },
+      retry: {
+        policiesRetry: jest.fn(),
+        permissionPoliciesRetry: jest.fn(),
+        conditionalPoliciesRetry: jest.fn(),
+      },
       error: new Error(''),
     });
     const { queryByText } = await renderInTestApp(
-      <PermissionsCard entityReference="user:default/debsmita1" />,
+      <PermissionsCard
+        entityReference="user:default/debsmita1"
+        canReadUsersAndGroups
+      />,
     );
     expect(queryByText('Permission Policies')).not.toBeNull();
     expect(queryByText('No records found')).not.toBeNull();
@@ -79,11 +94,18 @@ describe('PermissionsCard', () => {
     mockPermissionPolicies.mockReturnValue({
       loading: false,
       data: [],
-      retry: { policiesRetry: jest.fn(), permissionPoliciesRetry: jest.fn() },
+      retry: {
+        policiesRetry: jest.fn(),
+        permissionPoliciesRetry: jest.fn(),
+        conditionalPoliciesRetry: jest.fn(),
+      },
       error: { message: '404', name: 'Not Found' },
     });
     const { queryByText } = await renderInTestApp(
-      <PermissionsCard entityReference="user:default/debsmita1" />,
+      <PermissionsCard
+        entityReference="user:default/debsmita1"
+        canReadUsersAndGroups
+      />,
     );
     expect(
       queryByText(
@@ -99,10 +121,17 @@ describe('PermissionsCard', () => {
       loading: false,
       data: [],
       error: new Error(''),
-      retry: { policiesRetry: jest.fn(), permissionPoliciesRetry: jest.fn() },
+      retry: {
+        policiesRetry: jest.fn(),
+        permissionPoliciesRetry: jest.fn(),
+        conditionalPoliciesRetry: jest.fn(),
+      },
     });
     const { getByTestId } = await renderInTestApp(
-      <PermissionsCard entityReference="role:default/rbac_admin" />,
+      <PermissionsCard
+        entityReference="role:default/rbac_admin"
+        canReadUsersAndGroups
+      />,
     );
     expect(getByTestId('update-policies')).not.toBeNull();
   });
@@ -113,11 +142,45 @@ describe('PermissionsCard', () => {
       loading: false,
       data: [],
       error: new Error(''),
-      retry: { policiesRetry: jest.fn(), permissionPoliciesRetry: jest.fn() },
+      retry: {
+        policiesRetry: jest.fn(),
+        permissionPoliciesRetry: jest.fn(),
+        conditionalPoliciesRetry: jest.fn(),
+      },
     });
     const { queryByTestId } = await renderInTestApp(
-      <PermissionsCard entityReference="role:default/rbac_admin" />,
+      <PermissionsCard
+        entityReference="role:default/rbac_admin"
+        canReadUsersAndGroups={false}
+      />,
     );
     expect(queryByTestId('disable-update-policies')).not.toBeNull();
+  });
+
+  it('should show conditions rules count for Conditional permission policies when the data is loaded', async () => {
+    mockUsePermission.mockReturnValue({ loading: false, allowed: true });
+    mockPermissionPolicies.mockReturnValue({
+      loading: false,
+      data: [
+        ...usePermissionPoliciesMockData,
+        ...mockFormInitialValues.permissionPoliciesRows,
+      ],
+      retry: {
+        policiesRetry: jest.fn(),
+        permissionPoliciesRetry: jest.fn(),
+        conditionalPoliciesRetry: jest.fn(),
+      },
+      error: new Error(''),
+    });
+    const { queryByText } = await renderInTestApp(
+      <PermissionsCard
+        entityReference="user:default/debsmita1"
+        canReadUsersAndGroups
+      />,
+    );
+    expect(queryByText('Permission Policies (4)')).not.toBeNull();
+    expect(queryByText('Read, Create, Delete', { exact: true })).not.toBeNull();
+    expect(queryByText('Read', { exact: true })).not.toBeNull();
+    expect(queryByText('1 rule')).not.toBeNull();
   });
 });

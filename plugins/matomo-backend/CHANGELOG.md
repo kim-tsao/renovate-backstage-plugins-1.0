@@ -1,3 +1,96 @@
+## @janus-idp/backstage-plugin-matomo-backend [1.5.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.5.0...@janus-idp/backstage-plugin-matomo-backend@1.5.1) (2024-06-19)
+
+
+### Bug Fixes
+
+* **matomo:** add default export for new backend system ([#1822](https://github.com/janus-idp/backstage-plugins/issues/1822)) ([5e72920](https://github.com/janus-idp/backstage-plugins/commit/5e72920209589535d503bb28e77f54175a0bd946))
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.11.1
+
+## @janus-idp/backstage-plugin-matomo-backend [1.5.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.15...@janus-idp/backstage-plugin-matomo-backend@1.5.0) (2024-06-13)
+
+
+### Features
+
+* **deps:** update to backstage 1.27 ([#1683](https://github.com/janus-idp/backstage-plugins/issues/1683)) ([a14869c](https://github.com/janus-idp/backstage-plugins/commit/a14869c3f4177049cb8d6552b36c3ffd17e7997d))
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.11.0
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.15](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.14...@janus-idp/backstage-plugin-matomo-backend@1.4.15) (2024-06-13)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.10.1
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.14](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.13...@janus-idp/backstage-plugin-matomo-backend@1.4.14) (2024-06-05)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.10.0
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.13](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.12...@janus-idp/backstage-plugin-matomo-backend@1.4.13) (2024-06-04)
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.12](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.11...@janus-idp/backstage-plugin-matomo-backend@1.4.12) (2024-06-04)
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.11](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.10...@janus-idp/backstage-plugin-matomo-backend@1.4.11) (2024-06-03)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.9.0
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.10](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.9...@janus-idp/backstage-plugin-matomo-backend@1.4.10) (2024-05-29)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.8.10
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.9](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.8...@janus-idp/backstage-plugin-matomo-backend@1.4.9) (2024-05-29)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.8.9
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.8](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.7...@janus-idp/backstage-plugin-matomo-backend@1.4.8) (2024-05-23)
+
+
+### Bug Fixes
+
+* **deps:** upgrade devex plugins to mui v5 ([#1696](https://github.com/janus-idp/backstage-plugins/issues/1696)) ([06d9cf0](https://github.com/janus-idp/backstage-plugins/commit/06d9cf0d8c134212329eb691ac21eb78ae155c09))
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.7](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.6...@janus-idp/backstage-plugin-matomo-backend@1.4.7) (2024-05-16)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.8.7
+
+## @janus-idp/backstage-plugin-matomo-backend [1.4.6](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.5...@janus-idp/backstage-plugin-matomo-backend@1.4.6) (2024-05-09)
+
+
+
+### Dependencies
+
+* **@janus-idp/cli:** upgraded to 1.8.6
+
 ## @janus-idp/backstage-plugin-matomo-backend [1.4.5](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-matomo-backend@1.4.4...@janus-idp/backstage-plugin-matomo-backend@1.4.5) (2024-05-02)
 
 

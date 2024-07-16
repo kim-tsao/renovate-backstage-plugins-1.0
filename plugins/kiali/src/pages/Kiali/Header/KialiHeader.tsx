@@ -22,12 +22,14 @@ export const KialiHeader = () => {
       >
         <Chip
           color="primary"
+          variant="outlined"
           icon={<ClusterIcon />}
           label={homeCluster?.name}
+          data-test="home-cluster"
         />
       </Tooltip>
-      <HelpKiali color="white" />
-      <MessageCenter color="white" />
+      <HelpKiali />
+      <MessageCenter />
       {kialiState.authentication.session && (
         <div
           style={{
@@ -35,8 +37,9 @@ export const KialiHeader = () => {
             flexDirection: 'row',
             justifyContent: 'space-between',
           }}
+          data-test="user"
         >
-          <span style={{ margin: '10px', color: 'white' }}>
+          <span style={{ margin: '10px' }}>
             <b>User : </b>
             {kialiState.authentication.session.username || 'anonymous'}
           </span>

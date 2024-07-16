@@ -1,3 +1,26 @@
+## @janus-idp/backstage-plugin-rbac-common [1.6.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac-common@1.6.0...@janus-idp/backstage-plugin-rbac-common@1.6.1) (2024-06-28)
+
+
+### Bug Fixes
+
+* **rbac:** correct plugin ID matching to permission policy ([#1795](https://github.com/janus-idp/backstage-plugins/issues/1795)) ([6dc4b1c](https://github.com/janus-idp/backstage-plugins/commit/6dc4b1c23d22252f394eecd8b795ac15507ecc50))
+
+## @janus-idp/backstage-plugin-rbac-common [1.6.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac-common@1.5.0...@janus-idp/backstage-plugin-rbac-common@1.6.0) (2024-06-13)
+
+
+### Features
+
+* **deps:** update to backstage 1.27 ([#1683](https://github.com/janus-idp/backstage-plugins/issues/1683)) ([a14869c](https://github.com/janus-idp/backstage-plugins/commit/a14869c3f4177049cb8d6552b36c3ffd17e7997d))
+
+## @janus-idp/backstage-plugin-rbac-common [1.5.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac-common@1.4.2...@janus-idp/backstage-plugin-rbac-common@1.5.0) (2024-06-04)
+
+
+### Features
+
+* **rbac:** add audit log for RBAC backend ([#1726](https://github.com/janus-idp/backstage-plugins/issues/1726)) ([e50464b](https://github.com/janus-idp/backstage-plugins/commit/e50464bcb38e9897ddfe208fdeef699e4bfeda3a))
+
+## @janus-idp/backstage-plugin-rbac-common [1.4.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac-common@1.4.1...@janus-idp/backstage-plugin-rbac-common@1.4.2) (2024-05-09)
+
 ## @janus-idp/backstage-plugin-rbac-common [1.4.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/backstage-plugin-rbac-common@1.4.0...@janus-idp/backstage-plugin-rbac-common@1.4.1) (2024-04-17)
 
 

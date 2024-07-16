@@ -1,6 +1,6 @@
 import * as React from 'react';
 import AceEditor from 'react-ace';
-import { useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import { Content } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
@@ -8,7 +8,10 @@ import { useApi } from '@backstage/core-plugin-api';
 import { Grid } from '@material-ui/core';
 import jsYaml from 'js-yaml';
 
-import { BreadcrumbView } from '../../components/BreadcrumbView/BreadcrumbView';
+import {
+  BreadcrumbView,
+  getPath,
+} from '../../components/BreadcrumbView/BreadcrumbView';
 import { DefaultSecondaryMasthead } from '../../components/DefaultSecondaryMasthead/DefaultSecondaryMasthead';
 import { kialiApiRef } from '../../services/Api';
 import { KialiAppState, KialiContext } from '../../store';
@@ -23,6 +26,8 @@ import 'ace-builds/src-noconflict/theme-twilight';
 
 import { useCallback, useEffect } from 'react';
 
+import { useTheme } from '@material-ui/core/styles';
+
 import {
   AceValidations,
   parseKialiValidations,
@@ -32,7 +37,11 @@ import { IstioConfigDetailsOverview } from './IstioConfigDetailsOverview';
 export const IstioConfigDetailsPage = (props: {
   entity?: boolean;
 }): React.JSX.Element => {
-  const { namespace, objectType, object } = useParams();
+  const path = getPath(useLocation());
+  const namespace = path.namespace;
+  const object = path.item;
+  const objectType = path.istioType;
+
   const kialiClient = useApi(kialiApiRef);
   const kialiState = React.useContext(KialiContext) as KialiAppState;
   const [istioConfig, setIstioConfig] = React.useState<IstioConfigDetails>();
@@ -72,6 +81,15 @@ export const IstioConfigDetailsPage = (props: {
     annotations: [],
   };
   const yamlSource = fetchYaml();
+  const editorStyle = { border: '1px solid #dcdcdc' };
+
+  const useDefaultTheme = (): string => {
+    const muiTheme = useTheme();
+    if (muiTheme.palette.type === 'light') {
+      return 'eclipse';
+    }
+    return 'twilight';
+  };
 
   editorValidations = parseKialiValidations(
     yamlSource,
@@ -91,13 +109,16 @@ export const IstioConfigDetailsPage = (props: {
             <AceEditor
               mode="yaml"
               setOptions={{ useWorker: false }}
-              theme="eclipse"
+              theme={useDefaultTheme()}
+              fontSize={14}
               width="100%"
+              showGutter
               readOnly
               wrapEnabled
               value={yamlSource}
               annotations={editorValidations.annotations}
               markers={editorValidations.markers}
+              style={editorStyle}
             />
           </Grid>
           <Grid xs={3}>

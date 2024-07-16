@@ -1,4 +1,3 @@
-import { loggerToWinstonLogger } from '@backstage/backend-common';
 import {
   coreServices,
   createBackendPlugin,
@@ -18,6 +17,9 @@ export const orchestratorPlugin = createBackendPlugin({
         httpRouter: coreServices.httpRouter,
         urlReader: coreServices.urlReader,
         scheduler: coreServices.scheduler,
+        permissions: coreServices.permissions,
+        httpAuth: coreServices.httpAuth,
+        auth: coreServices.auth,
         catalogApi: catalogServiceRef,
       },
       async init({
@@ -28,17 +30,30 @@ export const orchestratorPlugin = createBackendPlugin({
         catalogApi,
         urlReader,
         scheduler,
+        permissions,
+        httpAuth,
+        auth,
       }) {
-        const log = loggerToWinstonLogger(logger);
         const router = await createRouter({
           config: config,
-          logger: log,
+          logger,
           discovery: discovery,
           catalogApi: catalogApi,
           urlReader: urlReader,
           scheduler: scheduler,
+          permissions: permissions,
+          httpAuth: httpAuth,
+          auth: auth,
         });
         httpRouter.use(router);
+        httpRouter.addAuthPolicy({
+          path: '/static/generated/envelope',
+          allow: 'unauthenticated',
+        });
+        httpRouter.addAuthPolicy({
+          path: '/health',
+          allow: 'unauthenticated',
+        });
       },
     });
   },

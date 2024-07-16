@@ -1,3 +1,20 @@
+## @janus-idp/shared-react [2.7.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.7.0...@janus-idp/shared-react@2.7.1) (2024-06-19)
+
+## @janus-idp/shared-react [2.7.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.6.4...@janus-idp/shared-react@2.7.0) (2024-06-13)
+
+
+### Features
+
+* **deps:** update to backstage 1.27 ([#1683](https://github.com/janus-idp/backstage-plugins/issues/1683)) ([a14869c](https://github.com/janus-idp/backstage-plugins/commit/a14869c3f4177049cb8d6552b36c3ffd17e7997d))
+
+## @janus-idp/shared-react [2.6.4](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.6.3...@janus-idp/shared-react@2.6.4) (2024-06-04)
+
+## @janus-idp/shared-react [2.6.3](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.6.2...@janus-idp/shared-react@2.6.3) (2024-05-29)
+
+## @janus-idp/shared-react [2.6.2](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.6.1...@janus-idp/shared-react@2.6.2) (2024-05-16)
+
+## @janus-idp/shared-react [2.6.1](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.6.0...@janus-idp/shared-react@2.6.1) (2024-05-09)
+
 ## @janus-idp/shared-react [2.6.0](https://github.com/janus-idp/backstage-plugins/compare/@janus-idp/shared-react@2.5.5...@janus-idp/shared-react@2.6.0) (2024-04-15)
 
 

@@ -1,11 +1,13 @@
-import { createServiceBuilder, UrlReader } from '@backstage/backend-common';
+import {
+  createServiceBuilder,
+  ServerTokenManager,
+  UrlReader,
+} from '@backstage/backend-common';
+import { DiscoveryService, LoggerService } from '@backstage/backend-plugin-api';
 import { PluginTaskScheduler } from '@backstage/backend-tasks';
 import { CatalogApi } from '@backstage/catalog-client';
 import { Config } from '@backstage/config';
-import { DiscoveryApi } from '@backstage/core-plugin-api';
-import { EventBroker } from '@backstage/plugin-events-node';
-
-import { Logger } from 'winston';
+import { ServerPermissionClient } from '@backstage/plugin-permission-node';
 
 import { Server } from 'http';
 
@@ -14,10 +16,9 @@ import { createRouter } from '../src/routerWrapper';
 export interface ServerOptions {
   port: number;
   enableCors: boolean;
-  logger: Logger;
-  eventBroker: EventBroker;
+  logger: LoggerService;
   config: Config;
-  discovery: DiscoveryApi;
+  discovery: DiscoveryService;
   catalogApi: CatalogApi;
   urlReader: UrlReader;
   scheduler: PluginTaskScheduler;
@@ -28,13 +29,20 @@ export async function startStandaloneServer(
 ): Promise<Server> {
   const logger = options.logger.child({ service: 'orchestrator-backend' });
   logger.debug('Starting application server...');
+
+  const permissions = ServerPermissionClient.fromConfig(options.config, {
+    discovery: options.discovery,
+    tokenManager: ServerTokenManager.noop(),
+  });
+
   const router = await createRouter({
-    logger: logger,
+    logger,
     config: options.config,
     discovery: options.discovery,
     catalogApi: options.catalogApi,
     urlReader: options.urlReader,
     scheduler: options.scheduler,
+    permissions: permissions,
   });
 
   let service = createServiceBuilder(module)

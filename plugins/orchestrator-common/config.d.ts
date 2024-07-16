@@ -62,31 +62,5 @@ export interface Config {
        */
       url: string;
     };
-    /**
-     * Configuration for the workflow editor.
-     */
-    editor?: {
-      /**
-       * Path to the envelope context (either a remote url or a local path under app/public folder).
-       * Default: https://sandbox.kie.org/swf-chrome-extension/0.32.0
-       * @visibility frontend
-       */
-      path?: string;
-    };
-    /**
-     * Configuration for the integration with Jira API.
-     * Note: This is a temporary solution. We should probably use the JIRA integration config instead.
-     */
-    jira?: {
-      /**
-       * Base URL of the Jira API.
-       */
-      host?: string;
-      /**
-       * Token to authenticate with the Jira API.
-       * @visibility secret
-       */
-      bearerToken?: string;
-    };
   };
 }

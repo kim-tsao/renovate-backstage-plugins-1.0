@@ -1,7 +1,7 @@
+import { LoggerService } from '@backstage/backend-plugin-api';
 import { Config } from '@backstage/config';
 
 import fs from 'fs-extra';
-import { Logger } from 'winston';
 
 import {
   DEFAULT_SONATAFLOW_BASE_URL,
@@ -30,13 +30,7 @@ interface DevModeConnectionConfig {
   containerImage: string;
   resourcesPath: string;
   persistencePath: string;
-  jira?: JiraConfig;
   repoUrl?: string;
-}
-
-interface JiraConfig {
-  host: string;
-  bearerToken: string;
 }
 
 export class DevModeService {
@@ -45,7 +39,7 @@ export class DevModeService {
 
   constructor(
     config: Config,
-    private readonly logger: Logger,
+    private readonly logger: LoggerService,
   ) {
     this.connection = this.extractConnectionConfig(config);
     this.gitService = new GitService(logger, config);
@@ -126,36 +120,25 @@ export class DevModeService {
 
     const launcherArgs = [
       'run',
+      '--name',
+      'backstage-internal-sonataflow',
       '--add-host',
       'host.docker.internal:host-gateway',
     ];
 
-    if (this.connection.jira) {
-      launcherArgs.push(`--add-host`, `jira.test:${this.connection.jira.host}`);
-    }
-
-    launcherArgs.push('--rm');
     launcherArgs.push('-e', `QUARKUS_HTTP_PORT=${this.connection.port}`);
 
     launcherArgs.push('-p', `${this.connection.port}:${this.connection.port}`);
     launcherArgs.push('-e', `KOGITO_SERVICE_URL=${this.devModeUrl}`);
     launcherArgs.push(
       '-v',
-      `${resourcesAbsPath}:${SONATA_FLOW_RESOURCES_PATH}`,
+      `${resourcesAbsPath}:${SONATA_FLOW_RESOURCES_PATH}:Z`,
     );
     launcherArgs.push('-e', 'KOGITO.CODEGEN.PROCESS.FAILONERROR=false');
     launcherArgs.push(
       '-e',
       `QUARKUS_EMBEDDED_POSTGRESQL_DATA_DIR=${this.connection.persistencePath}`,
     );
-
-    if (this.connection.jira) {
-      launcherArgs.push(
-        '-e',
-        'QUARKUS_REST_CLIENT_JIRA_OPENAPI_JSON_URL=http://jira.test:8080 -e ',
-      );
-      launcherArgs.push(`JIRABEARERTOKEN=${this.connection.jira.bearerToken}`);
-    }
 
     launcherArgs.push(this.connection.containerImage);
 
@@ -187,19 +170,6 @@ export class DevModeService {
         'orchestrator.sonataFlowService.persistence.path',
       ) ?? DEFAULT_SONATAFLOW_PERSISTENCE_PATH;
 
-    const jiraHost = config.getOptionalString('orchestrator.jira.host');
-    const jiraBearerToken = config.getOptionalString(
-      'orchestrator.jira.bearerToken',
-    );
-
-    const jiraConfig: JiraConfig | undefined =
-      jiraHost && jiraBearerToken
-        ? {
-            host: jiraHost,
-            bearerToken: jiraBearerToken,
-          }
-        : undefined;
-
     const repoUrl =
       config.getOptionalString(
         'orchestrator.sonataFlowService.workflowsSource.gitRepositoryUrl',
@@ -211,7 +181,6 @@ export class DevModeService {
       containerImage,
       resourcesPath,
       persistencePath,
-      jira: jiraConfig,
       repoUrl,
     };
   }

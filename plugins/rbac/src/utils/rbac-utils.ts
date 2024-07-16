@@ -4,15 +4,32 @@ import {
   parseEntityRef,
   stringifyEntityRef,
 } from '@backstage/catalog-model';
+import {
+  AllOfCriteria,
+  AnyOfCriteria,
+  NotCriteria,
+  PermissionCondition,
+  PermissionCriteria,
+} from '@backstage/plugin-permission-common';
 
 import {
-  PermissionPolicy,
-  Policy,
+  isResourcedPolicy,
+  PermissionAction,
+  PluginPermissionMetaData,
+  PolicyDetails,
+  ResourcedPolicy,
   RoleBasedPolicy,
+  RoleConditionalPolicyDecision,
 } from '@janus-idp/backstage-plugin-rbac-common';
 import { getTitleCase } from '@janus-idp/shared-react';
 
-import { RowPolicy, SelectedMember } from '../components/CreateRole/types';
+import { criterias } from '../components/ConditionalAccess/const';
+import { ConditionsData } from '../components/ConditionalAccess/types';
+import {
+  PluginsPermissionPoliciesData,
+  RowPolicy,
+  SelectedMember,
+} from '../components/CreateRole/types';
 import {
   MemberEntity,
   MembersData,
@@ -93,12 +110,34 @@ export const getMembersFromGroup = (group: GroupEntity): number => {
   return membersList || 0;
 };
 
-export const getPluginId = (
-  permissions: PermissionPolicy[],
-  permission: string | undefined,
-): string =>
-  permissions.find(p => p.policies?.find(pol => pol.permission === permission))
-    ?.pluginId || '-';
+export const getPluginInfo = (
+  permissions: PluginPermissionMetaData[],
+  permissionName?: string,
+): { pluginId: string; isResourced: boolean } =>
+  permissions.reduce(
+    (
+      acc: { pluginId: string; isResourced: boolean },
+      p: PluginPermissionMetaData,
+    ) => {
+      const policy = p.policies.find(pol => {
+        if (pol.name === permissionName) {
+          return true;
+        }
+        if (isResourcedPolicy(pol)) {
+          return (pol as ResourcedPolicy).resourceType === permissionName;
+        }
+        return false;
+      });
+      if (policy) {
+        return {
+          pluginId: p.pluginId || '-',
+          isResourced: isResourcedPolicy(policy) || false,
+        };
+      }
+      return acc;
+    },
+    { pluginId: '-', isResourced: false },
+  );
 
 const getPolicy = (str: string) => {
   const arr = str.split('.');
@@ -108,11 +147,12 @@ const getPolicy = (str: string) => {
 const getAllPolicies = (
   permission: string,
   allowedPolicies: RowPolicy[],
-  policies: Policy[],
+  policies: PolicyDetails[],
 ) => {
   const deniedPolicies = policies?.reduce((acc, p) => {
+    const perm = isResourcedPolicy(p) ? p.resourceType : p.name;
     if (
-      permission === p.permission &&
+      permission === perm &&
       !allowedPolicies.find(
         allowedPolicy =>
           allowedPolicy.policy.toLowerCase() === p.policy?.toLowerCase(),
@@ -130,7 +170,7 @@ const getAllPolicies = (
 
 export const getPermissionsData = (
   policies: RoleBasedPolicy[],
-  permissionPolicies: PermissionPolicy[],
+  permissionPolicies: PluginPermissionMetaData[],
 ): PermissionsData[] => {
   const data = policies.reduce(
     (acc: PermissionsDataSet[], policy: RoleBasedPolicy) => {
@@ -159,12 +199,15 @@ export const getPermissionsData = (
           const policiesSet = new Set<{ policy: string; effect: string }>();
           acc.push({
             permission: policy.permission || '-',
-            plugin: getPluginId(permissionPolicies, policy?.permission) || '-',
+            plugin: getPluginInfo(permissionPolicies, policy?.permission)
+              .pluginId,
             policyString: policyString.add(policyTitleCase || 'Use'),
             policies: policiesSet.add({
               policy: policyTitleCase || 'Use',
               effect: policy.effect,
             }),
+            isResourced: getPluginInfo(permissionPolicies, policy?.permission)
+              .isResourced,
           });
         }
       }
@@ -179,9 +222,100 @@ export const getPermissionsData = (
       p.permission,
       Array.from(p.policies),
       permissionPolicies.find(pp => pp.pluginId === p.plugin)
-        ?.policies as Policy[],
+        ?.policies as PolicyDetails[],
     ),
   })) as PermissionsData[];
+};
+
+export const getConditionUpperCriteria = (
+  conditions: PermissionCriteria<PermissionCondition>,
+): string | undefined => {
+  return Object.keys(conditions).find(key =>
+    [criterias.allOf, criterias.anyOf, criterias.not].includes(key),
+  );
+};
+
+export const getConditionsData = (
+  conditions: PermissionCriteria<PermissionCondition>,
+): ConditionsData | undefined => {
+  const upperCriteria = getConditionUpperCriteria(conditions) || 'condition';
+
+  switch (upperCriteria) {
+    case criterias.allOf: {
+      const allOfConditions = (conditions as AllOfCriteria<PermissionCondition>)
+        .allOf;
+      if (allOfConditions.find(c => !!getConditionUpperCriteria(c))) {
+        return undefined;
+      }
+      return { allOf: allOfConditions as PermissionCondition[] };
+    }
+    case criterias.anyOf: {
+      const anyOfConditions = (conditions as AnyOfCriteria<PermissionCondition>)
+        .anyOf;
+      if (anyOfConditions.find(c => !!getConditionUpperCriteria(c))) {
+        return undefined;
+      }
+      return { anyOf: anyOfConditions as PermissionCondition[] };
+    }
+    case criterias.not: {
+      const notConditions = (conditions as NotCriteria<PermissionCondition>)
+        .not;
+      if (getConditionUpperCriteria(notConditions)) {
+        return undefined;
+      }
+      return { not: notConditions as PermissionCondition };
+    }
+    default:
+      return { condition: conditions as PermissionCondition };
+  }
+};
+
+export const getPoliciesData = (
+  allowedPermissions: string[],
+  policies: string[],
+): RowPolicy[] => {
+  return policies.map(p => ({
+    policy: p,
+    ...(allowedPermissions.includes(p.toLowerCase())
+      ? { effect: 'allow' }
+      : { effect: 'deny' }),
+  }));
+};
+
+export const getConditionalPermissionsData = (
+  conditionalPermissions: RoleConditionalPolicyDecision<PermissionAction>[],
+  permissionPolicies: PluginsPermissionPoliciesData,
+): PermissionsData[] => {
+  return conditionalPermissions.reduce((acc: any, cp) => {
+    const conditions = getConditionsData(cp.conditions);
+    const allPolicies =
+      permissionPolicies.pluginsPermissions?.[cp.pluginId]?.policies?.[
+        cp.resourceType
+      ]?.policies ?? [];
+    const allowedPermissions = cp.permissionMapping.map(action =>
+      action.toLowerCase(),
+    );
+    const policyString = allowedPermissions
+      .map(p => p[0].toUpperCase() + p.slice(1))
+      .join(', ');
+
+    return [
+      ...acc,
+      ...(conditions
+        ? [
+            {
+              plugin: cp.pluginId,
+              permission: cp.resourceType,
+              isResourced: true,
+              policies: getPoliciesData(allowedPermissions, allPolicies),
+              policyString,
+              conditions,
+              id: cp.id,
+            },
+          ]
+        : []),
+    ];
+  }, []);
 };
 
 export const getKindNamespaceName = (roleRef: string) => {

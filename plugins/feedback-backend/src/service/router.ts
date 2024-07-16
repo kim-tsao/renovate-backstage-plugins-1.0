@@ -3,13 +3,13 @@ import {
   errorHandler,
   PluginEndpointDiscovery,
 } from '@backstage/backend-common';
+import { AuthService, LoggerService } from '@backstage/backend-plugin-api';
 import { CatalogClient } from '@backstage/catalog-client';
-import { Entity } from '@backstage/catalog-model';
+import { Entity, UserEntityV1alpha1 } from '@backstage/catalog-model';
 import { Config } from '@backstage/config';
 
 import express from 'express';
 import Router from 'express-promise-router';
-import { Logger } from 'winston';
 
 import { JiraApiService } from '../api';
 import { DatabaseFeedbackStore } from '../database/feedbackStore';
@@ -17,27 +17,28 @@ import { FeedbackCategory, FeedbackModel } from '../model/feedback.model';
 import { NodeMailer } from './emails';
 
 export interface RouterOptions {
-  logger: Logger;
+  logger: LoggerService;
   config: Config;
   discovery: PluginEndpointDiscovery;
+  auth: AuthService;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const { logger, config, discovery } = options;
-
+  const { logger, config, discovery, auth } = options;
   const router = Router();
   const feedbackDB = await DatabaseFeedbackStore.create({
     database: DatabaseManager.fromConfig(config).forPlugin('feedback'),
     skipMigrations: false,
-    logger: logger,
+    logger,
   });
 
   const mailer = new NodeMailer(config, logger);
   const catalogClient = new CatalogClient({ discoveryApi: discovery });
 
   router.use(express.json());
+  logger.info('Feedback backend plugin is running');
 
   router.post('/', (req, res) => {
     (async () => {
@@ -58,8 +59,15 @@ export async function createRouter(
           error: `The value of feedbackType should be either 'FEEDBACK'/'BUG'`,
         });
 
+      const { token } = await auth.getPluginRequestToken({
+        onBehalfOf: await auth.getOwnServiceCredentials(),
+        targetPluginId: 'catalog',
+      });
       const entityRef: Entity | undefined = await catalogClient.getEntityByRef(
         reqData.projectId!,
+        {
+          token,
+        },
       );
       if (!entityRef) {
         return res
@@ -78,9 +86,9 @@ export async function createRouter(
         reqData.description = reqData.summary
           ?.concat('\n\n')
           .concat(reqData.description ?? '');
-        reqData.summary = `${feedbackType} reported by ${reqData.createdBy?.split(
-          '/',
-        )[1]} for ${entityRef.metadata.title ?? entityRef.metadata.name}`;
+        reqData.summary = `${feedbackType} reported by ${
+          reqData.createdBy?.split('/')[1]
+        } for ${entityRef.metadata.title ?? entityRef.metadata.name}`;
       }
 
       const respObj = await feedbackDB.storeFeedbackGetUuid(reqData);
@@ -101,9 +109,10 @@ export async function createRouter(
         const type = annotations['feedback/type'];
         const replyTo = annotations['feedback/email-to'];
         const reporterEmail = (
-          (await catalogClient.getEntityByRef(reqData.createdBy!))?.spec
-            ?.profile as { email: string }
-        ).email;
+          (await catalogClient.getEntityByRef(reqData.createdBy!, {
+            token,
+          })) as UserEntityV1alpha1
+        ).spec.profile?.email;
         const appTitle = config.getString('app.title');
 
         if (
@@ -111,21 +120,32 @@ export async function createRouter(
           !reqData.tag?.match(/(Excellent|Good)/g)
         ) {
           let host = annotations['feedback/host'];
+          let serviceConfig: Config;
           // if host is undefined then
           // use the first host from config
-          const serviceConfig =
-            config
-              .getConfigArray('feedback.integrations.jira')
-              .find(hostConfig => host === hostConfig.getString('host')) ??
-            config.getConfigArray('feedback.integrations.jira')[0];
+          try {
+            serviceConfig =
+              config
+                .getConfigArray('feedback.integrations.jira')
+                .find(hostConfig => host === hostConfig.getString('host')) ??
+              config.getConfigArray('feedback.integrations.jira')[0];
+          } catch {
+            return logger.error('Jira integeration not found');
+          }
           host = serviceConfig.getString('host');
           const authToken = serviceConfig.getString('token');
           const hostType = serviceConfig.getOptionalString('hostType');
 
           const projectKey = entityRef.metadata.annotations['jira/project-key'];
-          const jiraService = new JiraApiService(host, authToken, hostType);
-          const jiraUsername =
-            await jiraService.getJiraUsernameByEmail(reporterEmail);
+          const jiraService = new JiraApiService(
+            host,
+            authToken,
+            logger,
+            hostType,
+          );
+          const jiraUsername = reporterEmail
+            ? await jiraService.getJiraUsernameByEmail(reporterEmail)
+            : undefined;
 
           // if jira id is not there for reporter, add reporter email in description
           const jiraDescription = reqData.description!.concat(
@@ -145,20 +165,21 @@ export async function createRouter(
             tag: reqData.tag!.toLowerCase().split(' ').join('-'),
             feedbackType: reqData.feedbackType,
             reporter: jiraUsername,
+            jiraComponent: entityRef.metadata.annotations['jira/component'],
           });
-          reqData.ticketUrl = `${host}/browse/${resp.key}`;
-          await feedbackDB.updateFeedback(reqData);
+          if (resp.key) {
+            reqData.ticketUrl = `${host}/browse/${resp.key}`;
+            await feedbackDB.updateFeedback(reqData);
+          }
         }
 
         if (type.toUpperCase() === 'MAIL' || replyTo) {
           mailer.sendMail({
-            to: reporterEmail,
+            to: reporterEmail ?? replyTo,
             replyTo: replyTo,
-            subject: `${
-              reqData.tag
-            } - ${feedbackType} reported for ${reqData.projectId?.split(
-              '/',
-            )[1]}`,
+            subject: `${reqData.tag} - ${feedbackType} reported for ${
+              reqData.projectId?.split('/')[1]
+            }`,
             body: `
             <div>
               Hi ${reqData.createdBy?.split('/')[1]},
@@ -251,8 +272,12 @@ export async function createRouter(
         : null;
 
       if (ticketId && projectId) {
+        const { token } = await auth.getPluginRequestToken({
+          onBehalfOf: await auth.getOwnServiceCredentials(),
+          targetPluginId: 'catalog',
+        });
         const entityRef: Entity | undefined =
-          await catalogClient.getEntityByRef(projectId);
+          await catalogClient.getEntityByRef(projectId, { token });
         if (!entityRef) {
           return res
             .status(404)
@@ -275,6 +300,7 @@ export async function createRouter(
           const resp = await new JiraApiService(
             host,
             authToken,
+            logger,
           ).getTicketDetails(ticketId);
           return res.status(200).json({
             data: { ...resp },

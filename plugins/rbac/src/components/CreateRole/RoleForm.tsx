@@ -19,8 +19,12 @@ import { FormikErrors, FormikHelpers, useFormik } from 'formik';
 import { rbacApiRef } from '../../api/RBACBackendClient';
 import { MemberEntity, PermissionsData, RoleError } from '../../types';
 import {
+  getConditionalPermissionPoliciesData,
+  getNewConditionalPolicies,
   getPermissionPoliciesData,
+  getRemovedConditionalPoliciesIds,
   getRoleData,
+  getUpdatedConditionalPolicies,
   validationSchema,
 } from '../../utils/create-role-utils';
 import {
@@ -28,6 +32,13 @@ import {
   isSamePermissionPolicy,
   onlyInLeft,
 } from '../../utils/rbac-utils';
+import {
+  createConditions,
+  createPermissions,
+  modifyConditions,
+  removeConditions,
+  removePermissions,
+} from '../../utils/role-form-utils';
 import { AddedMembersTable } from './AddedMembersTable';
 import { AddMembersForm } from './AddMembersForm';
 import { PermissionPoliciesForm } from './PermissionPoliciesForm';
@@ -81,6 +92,15 @@ export const RoleForm = ({
     try {
       const newData = getRoleData(values);
       const newPermissionsData = getPermissionPoliciesData(values);
+      const newConditions = getNewConditionalPolicies(values);
+      const deleteConditions = getRemovedConditionalPoliciesIds(
+        values,
+        initialValues,
+      );
+      const updateConditions = getUpdatedConditionalPolicies(
+        values,
+        initialValues,
+      );
 
       const oldData = getRoleData(initialValues);
       const res = await rbacApi.updateRole(oldData, newData);
@@ -101,30 +121,13 @@ export const RoleForm = ({
           isSamePermissionPolicy,
         );
 
-        if (newPermissions.length > 0) {
-          const permissionsRes = await rbacApi.createPolicies(newPermissions);
-          if ((permissionsRes as unknown as RoleError).error) {
-            throw new Error(
-              `Unable to create the permissions. ${
-                (permissionsRes as unknown as RoleError).error.message
-              }`,
-            );
-          }
-        }
+        await removePermissions(name, deletePermissions, rbacApi);
+        await createPermissions(newPermissions, rbacApi);
 
-        if (deletePermissions.length > 0) {
-          const permissionsRes = await rbacApi.deletePolicies(
-            name,
-            deletePermissions,
-          );
-          if ((permissionsRes as unknown as RoleError).error) {
-            throw new Error(
-              `Unable to delete the permissions. ${
-                (permissionsRes as unknown as RoleError).error.message
-              }`,
-            );
-          }
-        }
+        await removeConditions(deleteConditions, rbacApi);
+        await modifyConditions(updateConditions, rbacApi);
+        await createConditions(newConditions, rbacApi);
+
         navigateTo(`${name} updated`);
       }
     } catch (e) {
@@ -139,6 +142,8 @@ export const RoleForm = ({
     try {
       const newData = getRoleData(values);
       const newPermissionsData = getPermissionPoliciesData(values);
+      const newConditionalPermissionPoliciesData =
+        getConditionalPermissionPoliciesData(values);
 
       const res = await rbacApi.createRole(newData);
       if ((res as RoleError).error) {
@@ -146,15 +151,19 @@ export const RoleForm = ({
           `${'Unable to create role. '}${(res as RoleError).error.message}`,
         );
       }
-      const permissionsRes: Response | RoleError =
-        await rbacApi.createPolicies(newPermissionsData);
-      if ((permissionsRes as unknown as RoleError).error) {
-        throw new Error(
-          `Role was created successfully but unable to add permissions to the role. ${
-            (permissionsRes as unknown as RoleError).error.message
-          }`,
-        );
-      }
+
+      await createPermissions(
+        newPermissionsData,
+        rbacApi,
+        'Role was created successfully but unable to add permission policies to the role.',
+      );
+
+      await createConditions(
+        newConditionalPermissionPoliciesData,
+        rbacApi,
+        'Role created successfully but unable to add conditions to the role.',
+      );
+
       navigateTo(`${newData.name} created`);
     } catch (e) {
       formikHelpers.setStatus({ submitError: e });

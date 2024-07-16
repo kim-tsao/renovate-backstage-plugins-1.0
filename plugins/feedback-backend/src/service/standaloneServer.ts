@@ -1,8 +1,11 @@
 import { createServiceBuilder, HostDiscovery } from '@backstage/backend-common';
-import { DiscoveryService } from '@backstage/backend-plugin-api';
+import {
+  AuthService,
+  DiscoveryService,
+  LoggerService,
+} from '@backstage/backend-plugin-api';
+import { mockServices } from '@backstage/backend-test-utils';
 import { Config, ConfigReader } from '@backstage/config';
-
-import { createLogger, Logger, transports } from 'winston';
 
 import { Server } from 'http';
 
@@ -11,7 +14,7 @@ import { createRouter } from './router';
 export interface ServerOptions {
   port: number;
   enableCors: boolean;
-  logger: Logger;
+  logger: LoggerService;
 }
 
 export async function startStandaloneServer(
@@ -19,14 +22,16 @@ export async function startStandaloneServer(
 ): Promise<Server> {
   const config: Config = new ConfigReader({});
   const discovery: DiscoveryService = HostDiscovery.fromConfig(config);
-  const logger: Logger = createLogger({
-    transports: [new transports.Console({ silent: true })],
+  const auth: AuthService = mockServices.auth({ pluginId: 'feedback' });
+  const logger: LoggerService = options.logger.child({
+    service: 'feedback-backend',
   });
   logger.debug('Starting application server...');
   const router = await createRouter({
-    logger: logger,
+    logger,
     config: config,
     discovery: discovery,
+    auth: auth,
   });
 
   let service = createServiceBuilder(module)
