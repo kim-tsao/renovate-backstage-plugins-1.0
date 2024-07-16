@@ -555,28 +555,6 @@
     },
     {
       "matchPackagePrefixes": [
-        "@types/"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "groupName": "types (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]
-    },
-    {
-      "matchPackagePrefixes": [
-        "@types/"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "types "
-    },
-    {
-      "matchPackagePrefixes": [
         "@scalprum/"
       ],
       "matchUpdateTypes": [
