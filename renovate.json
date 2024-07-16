@@ -513,8 +513,7 @@
       "groupName": "react (non-major)",
       "addLabels": [
         "team/rhdh"
-      ],
-      "automerge": true
+      ]
     },
     {
       "extends": [
@@ -528,6 +527,31 @@
         "team/rhdh"
       ]
     },
+    {
+      "extends": [
+        "monorepo:babel"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "react (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]   
+    },
+    {
+      "extends": [
+        "monorepo:babel"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "react (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]   
+    },    
     {
       "extends": [
         "packages:linters"
