@@ -341,41 +341,6 @@
     },
     {
       "matchFileNames": [
-        "plugins/notifications*/**"
-      ],
-      "additionalBranchPrefix": "notifications ",
-      "addLabels": [
-        "team/notifications"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "matchDepTypes": [
-        "dependencies",
-        "peerDependencies"
-      ],
-      "groupName": "Notifications Dependencies  (non-major)"
-    },
-    {
-      "matchFileNames": [
-        "plugins/notifications*/**"
-      ],
-      "additionalBranchPrefix": "notifications",
-      "addLabels": [
-        "team/notifications"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "matchDepTypes": [
-        "dependencies",
-        "peerDependencies"
-      ],
-      "groupName": "Notifications Dependencies"
-    },
-    {
-      "matchFileNames": [
         "plugins/kiali*/**"
       ],
       "additionalBranchPrefix": "kiali ",
