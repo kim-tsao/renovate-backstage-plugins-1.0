@@ -234,6 +234,29 @@
     },    
     {
       "extends": [
+        "monorepo:storybook",
+        "monorepo:storybook-react-native"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "matchCurrentVersion": "!/^0/",
+      "groupName": "Storybook packages (minor)",
+      "automerge": true
+    },
+    {
+      "extends": [
+        "monorepo:storybook",
+        "monorepo:storybook-react-native"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Storybook packages"
+    },
+    {
+      "extends": [
         "packages:linters"
       ],
       "matchUpdateTypes": [
