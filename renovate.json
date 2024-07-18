@@ -215,7 +215,7 @@
         "patch",
         "minor"
       ],
-      "groupName": "babel {{depTypes}} (non-major)",
+      "groupName": "babel (non-major)",
       "addLabels": [
         "team/rhdh"
       ]   
@@ -227,7 +227,7 @@
       "matchUpdateTypes": [
         "major"
       ],
-      "groupName": "babel {{depTypes}} (non-major)",
+      "groupName": "babel (non-major)",
       "addLabels": [
         "team/rhdh"
       ]   
