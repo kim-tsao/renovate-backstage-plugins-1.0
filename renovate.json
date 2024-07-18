@@ -158,6 +158,130 @@
       "groupName": "Storybook react webpack5 dependency"
     },
     {
+      "extends": [
+        "monorepo:material-ui"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "material-ui (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
+      "extends": [
+        "monorepo:material-ui"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "material-ui",
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
+      "extends": [
+        "monorepo:react"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "react (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
+      "extends": [
+        "monorepo:react"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "react",
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
+      "extends": [
+        "monorepo:babel"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "babel {{depTypes}} (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]   
+    },
+    {
+      "extends": [
+        "monorepo:babel"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "babel {{depTypes}} (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]   
+    },    
+    {
+      "extends": [
+        "packages:linters"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "matchCurrentVersion": "!/^0/",
+      "groupName": "linters  (non-major)",
+      "automerge": true,
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
+      "extends": [
+        "packages:linters"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "linters"
+    },
+    {
+      "matchPackagePrefixes": [
+        "@scalprum/"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "groupName": "Scalprum (non-major)",
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
+      "matchPackagePrefixes": [
+        "@scalprum/"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "groupName": "Scalprum ",
+      "addLabels": [
+        "team/rhdh"
+      ]
+    },
+    {
       "matchFileNames": [
         "plugins/orchestrator*/**"
       ],
@@ -453,130 +577,6 @@
         "peerDependencies"
       ],
       "groupName": "Community Dependencies "
-    },
-    {
-      "extends": [
-        "monorepo:material-ui"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "groupName": "material-ui (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]
-    },
-    {
-      "extends": [
-        "monorepo:material-ui"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "material-ui",
-      "addLabels": [
-        "team/rhdh"
-      ]
-    },
-    {
-      "extends": [
-        "monorepo:react"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "groupName": "react (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]
-    },
-    {
-      "extends": [
-        "monorepo:react"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "react",
-      "addLabels": [
-        "team/rhdh"
-      ]
-    },
-    {
-      "extends": [
-        "monorepo:babel"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "groupName": "babel {{depTypes}} (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]   
-    },
-    {
-      "extends": [
-        "monorepo:babel"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "babel {{depTypes}} (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]   
-    },    
-    {
-      "extends": [
-        "packages:linters"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "matchCurrentVersion": "!/^0/",
-      "groupName": "linters  (non-major)",
-      "automerge": true,
-      "addLabels": [
-        "team/rhdh"
-      ]
-    },
-    {
-      "extends": [
-        "packages:linters"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "linters"
-    },
-    {
-      "matchPackagePrefixes": [
-        "@scalprum/"
-      ],
-      "matchUpdateTypes": [
-        "patch",
-        "minor"
-      ],
-      "groupName": "Scalprum (non-major)",
-      "addLabels": [
-        "team/rhdh"
-      ]
-    },
-    {
-      "matchPackagePrefixes": [
-        "@scalprum/"
-      ],
-      "matchUpdateTypes": [
-        "major"
-      ],
-      "groupName": "Scalprum ",
-      "addLabels": [
-        "team/rhdh"
-      ]
     }
   ],
   "separateMajorMinor": true,
