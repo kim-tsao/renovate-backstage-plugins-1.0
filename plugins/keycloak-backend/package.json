@@ -60,7 +60,7 @@
     "@backstage/backend-test-utils": "0.3.8",
     "@backstage/cli": "0.26.6",
     "@backstage/plugin-auth-node": "0.4.13",
-    "@backstage/plugin-catalog-backend": "1.22.0",
+    "@backstage/plugin-catalog-backend": "1.26.0",
     "@backstage/plugin-permission-common": "0.7.13",
     "@backstage/plugin-permission-node": "0.7.29",
     "@janus-idp/cli": "1.11.1",
