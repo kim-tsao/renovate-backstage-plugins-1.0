@@ -64,7 +64,7 @@
     "@backstage/cli": "0.26.6",
     "@janus-idp/cli": "1.11.1",
     "@backstage/plugin-auth-node": "0.4.13",
-    "@backstage/plugin-catalog-backend": "1.22.0",
+    "@backstage/plugin-catalog-backend": "1.26.0",
     "@backstage/plugin-permission-common": "0.7.13",
     "@backstage/plugin-permission-node": "0.7.29",
     "@types/express": "4.17.21",
