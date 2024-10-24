@@ -44,7 +44,7 @@
     "@types/regression": "^2.0.6",
     "ace-builds": "^1.32.7",
     "axios": "^1.5.1",
-    "cytoscape": "3.29.2",
+    "cytoscape": "3.30.3",
     "d3-format": "^3.1.0",
     "deep-freeze": "0.0.1",
     "history": "^5.3.0",
